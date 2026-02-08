@@ -1,10 +1,12 @@
-﻿using Lihtar.Application.Interfaces;
+﻿using System.Text;
+using Lihtar.Application.Interfaces;
 using Lihtar.Domain.Enums;
 using Lihtar.Infrastructure.Identity;
 using Lihtar.Web.ViewModels.Account;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace Lihtar.Web.Controllers;
 
@@ -49,7 +51,6 @@ public class AccountController : Controller
             return View(vm);
         }
 
-        // login by username (у нас username == email)
         var result = await _signInManager.PasswordSignInAsync(
             userName: vm.Email,
             password: vm.Password,
@@ -62,7 +63,6 @@ public class AccountController : Controller
             return View(vm);
         }
 
-        // ВАЖЛИВО: коли RequireConfirmedEmail=true, то сюди попаде непідтверджений юзер
         if (result.IsNotAllowed)
         {
             ModelState.AddModelError("", "Email не підтверджено. Перевір пошту і натисни Confirm.");
@@ -75,11 +75,9 @@ public class AccountController : Controller
             return View(vm);
         }
 
-        // redirect returnUrl якщо є
         if (!string.IsNullOrWhiteSpace(vm.ReturnUrl) && Url.IsLocalUrl(vm.ReturnUrl))
             return Redirect(vm.ReturnUrl);
 
-        // redirect по ролі
         var roles = await _userManager.GetRolesAsync(user);
         if (roles.Contains(UserRole.Admin.ToString()))
             return RedirectToAction("Index", "AdminHome", new { area = "Admin" });
@@ -111,7 +109,7 @@ public class AccountController : Controller
             Email = vm.Email,
             FullName = vm.FullName,
             Role = UserRole.Client,
-            EmailConfirmed = false,   // ✅ тепер треба підтвердження
+            EmailConfirmed = false,
             IsBlocked = false
         };
 
@@ -126,25 +124,20 @@ public class AccountController : Controller
 
         await _userManager.AddToRoleAsync(user, UserRole.Client.ToString());
 
-        // 1) token
         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-        // 2) link
         var link = Url.Action(
             nameof(ConfirmEmail),
             "Account",
             new { userId = user.Id, token },
             protocol: Request.Scheme)!;
 
-        // 3) message
         var html = $@"
 <h2>Підтвердження пошти</h2>
 <p>Натисни кнопку/посилання, щоб підтвердити email:</p>
 <p><a href=""{link}"">Confirm Email</a></p>
 <p>Якщо ти не реєструвався — просто ігноруй цей лист.</p>";
 
-        // 4) send email
-        
         if (string.IsNullOrWhiteSpace(user.Email))
         {
             ModelState.AddModelError("", "Email не задано. Перевір форму реєстрації.");
@@ -153,8 +146,6 @@ public class AccountController : Controller
 
         await _emailSender.SendAsync(user.Email, "Lihtar ArtPub - Confirm your email", html);
 
-
-        // НЕ логінимо, доки не підтвердить
         return RedirectToAction(nameof(RegistrationSuccess));
     }
 
@@ -180,6 +171,120 @@ public class AccountController : Controller
 
         return View();
     }
+
+    // -------------------- FORGOT PASSWORD --------------------
+
+    [HttpGet]
+    public IActionResult ForgotPassword()
+        => View(new ForgotPasswordVm());
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordVm vm)
+    {
+        if (!ModelState.IsValid) return View(vm);
+
+        var user = await _userManager.FindByEmailAsync(vm.Email);
+
+        // не палимо існування email
+        if (user is null || user.IsBlocked || !await _userManager.IsEmailConfirmedAsync(user))
+            return RedirectToAction(nameof(ForgotPasswordConfirmation));
+
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+        // ✅ token -> URL-safe
+        var tokenBytes = Encoding.UTF8.GetBytes(token);
+        var tokenEncoded = WebEncoders.Base64UrlEncode(tokenBytes);
+
+        var link = Url.Action(
+            nameof(ResetPassword),
+            "Account",
+            new { userId = user.Id, token = tokenEncoded },
+            protocol: Request.Scheme)!;
+
+        var html = $@"
+<h2>Скидання паролю</h2>
+<p>Натисни посилання, щоб встановити новий пароль:</p>
+<p><a href=""{link}"">Reset password</a></p>
+<p>Якщо ти не робив запит — просто ігноруй цей лист.</p>";
+
+        await _emailSender.SendAsync(user.Email!, "Lihtar ArtPub - Reset password", html);
+
+        return RedirectToAction(nameof(ForgotPasswordConfirmation));
+    }
+
+    [HttpGet]
+    public IActionResult ForgotPasswordConfirmation()
+        => View();
+
+    // -------------------- RESET PASSWORD --------------------
+
+    [HttpGet]
+    public IActionResult ResetPassword(Guid userId, string token)
+    {
+        // ✅ ВАЖЛИВО: тут НЕ декодуємо
+        // кладемо tokenEncoded у VM і передаємо в hidden input
+        return View(new ResetPasswordVm
+        {
+            UserId = userId,
+            Token = token
+        });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ResetPassword(ResetPasswordVm vm)
+    {
+        if (!ModelState.IsValid) return View(vm);
+
+        var user = await _userManager.FindByIdAsync(vm.UserId.ToString());
+        if (user is null)
+        {
+            ModelState.AddModelError("", "Користувача не знайдено");
+            return View(vm);
+        }
+
+        if (user.IsBlocked)
+        {
+            ModelState.AddModelError("", "Акаунт заблоковано");
+            return View(vm);
+        }
+
+        if (string.IsNullOrWhiteSpace(vm.Token))
+        {
+            ModelState.AddModelError("", "Token порожній. Спробуй ще раз отримати лист для скидання паролю.");
+            return View(vm);
+        }
+
+        // ✅ tokenEncoded -> token (оригінальний)
+        string tokenDecoded;
+        try
+        {
+            var tokenBytes = WebEncoders.Base64UrlDecode(vm.Token);
+            tokenDecoded = Encoding.UTF8.GetString(tokenBytes);
+        }
+        catch
+        {
+            ModelState.AddModelError("", "Token пошкоджено. Спробуй ще раз отримати лист для скидання паролю.");
+            return View(vm);
+        }
+
+        var result = await _userManager.ResetPasswordAsync(user, tokenDecoded, vm.Password);
+
+        if (!result.Succeeded)
+        {
+            foreach (var e in result.Errors)
+                ModelState.AddModelError("", $"{e.Code}: {e.Description}");
+
+            return View(vm);
+        }
+
+        return RedirectToAction(nameof(ResetPasswordSuccess));
+    }
+
+    [HttpGet]
+    public IActionResult ResetPasswordSuccess()
+        => View();
 
     // -------------------- LOGOUT --------------------
 
