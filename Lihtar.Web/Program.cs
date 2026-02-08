@@ -1,18 +1,31 @@
-using Lihtar.Infrastructure.Data;
+﻿using Lihtar.Infrastructure.Data;
 using Lihtar.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Lihtar.Application.Interfaces;
+using Lihtar.Application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddScoped<IMenuCategoryService, MenuCategoryService>();
+
 builder.Services.AddDbContext<ArtPubDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>()
+    .AddRoles<IdentityRole<Guid>>()
     .AddEntityFrameworkStores<ArtPubDbContext>()
     .AddDefaultTokenProviders();
+
+builder.Services.Configure<IdentityOptions>(opt =>
+{
+    opt.SignIn.RequireConfirmedEmail = true;
+
+
+});
+
 
 builder.Services.ConfigureApplicationCookie(opt =>
 {
@@ -21,12 +34,26 @@ builder.Services.ConfigureApplicationCookie(opt =>
 });
 
 var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ArtPubDbContext>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+
+    await DbInitializer.SeedAsync(db, userManager, roleManager);
+}
 
 app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapGet("/Admin", ctx =>
+{
+    ctx.Response.Redirect("/Admin/AdminHome");
+    return Task.CompletedTask;
+});
 
 app.MapControllerRoute(
     name: "areas",

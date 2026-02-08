@@ -1,0 +1,11 @@
+﻿<h2>Email not confirmed</h2>
+
+<p>Confirm your email to login: <b>@ViewBag.Email</b></p>
+
+<form asp-action="ResendConfirmation" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="email" value="@ViewBag.Email" />
+    <button type="submit">Resend confirmation link</button>
+</form>
+
+<p><a asp-action="Login">Back to login</a></p>

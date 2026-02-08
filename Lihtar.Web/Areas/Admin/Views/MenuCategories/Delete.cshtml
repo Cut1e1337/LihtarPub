@@ -1,0 +1,13 @@
+﻿@model Lihtar.Application.DTOs.MenuCategoryDto
+
+<h2>Delete Menu Category</h2>
+
+<p>Are you sure you want to delete: <b>@Model.Name</b>?</p>
+
+<form asp-area="Admin" asp-controller="MenuCategories" asp-action="Delete" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" value="@Model.Id" />
+
+    <button type="submit">Delete</button>
+    <a asp-area="Admin" asp-controller="MenuCategories" asp-action="Index">Back</a>
+</form>

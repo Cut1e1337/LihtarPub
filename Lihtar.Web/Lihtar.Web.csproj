@@ -7,11 +7,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Folder Include="Areas\Admin\" />
-		<Folder Include="ViewModels\" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<ProjectReference Include="..\Lihtar.Application\Lihtar.Application.csproj" />
 		<ProjectReference Include="..\Lihtar.Infrastructure\Lihtar.Infrastructure.csproj" />
 	</ItemGroup>
