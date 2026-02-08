@@ -6,11 +6,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="Services\" />
-    <Folder Include="Repositories\" />
-  </ItemGroup>
-
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.17" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.17" />
@@ -25,6 +20,7 @@
 
 
 	<ItemGroup>
+    <ProjectReference Include="..\Lihtar.Application\Lihtar.Application.csproj" />
     <ProjectReference Include="..\Lihtar.Domain\Lihtar.Domain.csproj" />
   </ItemGroup>
 

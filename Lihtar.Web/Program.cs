@@ -1,13 +1,26 @@
-﻿using Lihtar.Infrastructure.Data;
+﻿using Lihtar.Application.Interfaces;
+using Lihtar.Application.Services;
+using Lihtar.Infrastructure.Data;
 using Lihtar.Infrastructure.Identity;
+using Lihtar.Infrastructure.Repositories;
+using Lihtar.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Lihtar.Application.Interfaces;
-using Lihtar.Application.Services;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
+
+builder.Services.Configure<IdentityOptions>(opt =>
+{
+    opt.SignIn.RequireConfirmedEmail = true;
+});
+
+builder.Services.AddScoped<IMenuCategoryRepository, MenuCategoryRepository>();
+builder.Services.AddScoped<IMenuCategoryService, MenuCategoryService>();
 
 builder.Services.AddScoped<IMenuCategoryService, MenuCategoryService>();
 

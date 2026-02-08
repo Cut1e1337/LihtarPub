@@ -1,24 +1,23 @@
 ﻿using Lihtar.Application.DTOs;
 using Lihtar.Application.Interfaces;
 using Lihtar.Domain.Entities;
-using Lihtar.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace Lihtar.Application.Services;
 
 public class MenuCategoryService : IMenuCategoryService
 {
-    private readonly ArtPubDbContext _db;
+    private readonly IMenuCategoryRepository _repo;
 
-    public MenuCategoryService(ArtPubDbContext db)
+    public MenuCategoryService(IMenuCategoryRepository repo)
     {
-        _db = db;
+        _repo = repo;
     }
 
     public async Task<List<MenuCategoryDto>> GetAllAsync()
     {
-        return await _db.MenuCategories
-            .OrderBy(x => x.SortOrder)
+        var list = await _repo.GetAllAsync();
+
+        return list
             .Select(x => new MenuCategoryDto
             {
                 Id = x.Id,
@@ -27,22 +26,22 @@ public class MenuCategoryService : IMenuCategoryService
                 SortOrder = x.SortOrder,
                 IsActive = x.IsActive
             })
-            .ToListAsync();
+            .ToList();
     }
 
     public async Task<MenuCategoryDto?> GetByIdAsync(Guid id)
     {
-        return await _db.MenuCategories
-            .Where(x => x.Id == id)
-            .Select(x => new MenuCategoryDto
-            {
-                Id = x.Id,
-                Name = x.Name,
-                Description = x.Description,
-                SortOrder = x.SortOrder,
-                IsActive = x.IsActive
-            })
-            .FirstOrDefaultAsync();
+        var x = await _repo.GetByIdAsync(id);
+        if (x is null) return null;
+
+        return new MenuCategoryDto
+        {
+            Id = x.Id,
+            Name = x.Name,
+            Description = x.Description,
+            SortOrder = x.SortOrder,
+            IsActive = x.IsActive
+        };
     }
 
     public async Task<Guid> CreateAsync(MenuCategoryDto dto)
@@ -56,14 +55,14 @@ public class MenuCategoryService : IMenuCategoryService
             IsActive = dto.IsActive
         };
 
-        _db.MenuCategories.Add(entity);
-        await _db.SaveChangesAsync();
+        await _repo.AddAsync(entity);
+        await _repo.SaveChangesAsync();
         return entity.Id;
     }
 
     public async Task UpdateAsync(MenuCategoryDto dto)
     {
-        var entity = await _db.MenuCategories.FirstOrDefaultAsync(x => x.Id == dto.Id)
+        var entity = await _repo.GetByIdAsync(dto.Id)
                      ?? throw new InvalidOperationException("MenuCategory not found");
 
         entity.Name = dto.Name;
@@ -71,15 +70,15 @@ public class MenuCategoryService : IMenuCategoryService
         entity.SortOrder = dto.SortOrder;
         entity.IsActive = dto.IsActive;
 
-        await _db.SaveChangesAsync();
+        await _repo.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(Guid id)
     {
-        var entity = await _db.MenuCategories.FirstOrDefaultAsync(x => x.Id == id)
+        var entity = await _repo.GetByIdAsync(id)
                      ?? throw new InvalidOperationException("MenuCategory not found");
 
-        _db.MenuCategories.Remove(entity);
-        await _db.SaveChangesAsync();
+        _repo.Remove(entity);
+        await _repo.SaveChangesAsync();
     }
 }
