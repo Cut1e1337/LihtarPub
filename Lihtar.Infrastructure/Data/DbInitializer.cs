@@ -1,4 +1,5 @@
-﻿using Lihtar.Domain.Enums;
+﻿using Lihtar.Domain.Entities;
+using Lihtar.Domain.Enums;
 using Lihtar.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -64,6 +65,19 @@ public static class DbInitializer
             if (!reset.Succeeded)
                 throw new Exception(string.Join("; ", reset.Errors.Select(e => e.Description)));
         }
+
+        if (!db.MenuItemTags.Any())
+        {
+            db.MenuItemTags.AddRange(
+                new MenuItemTag { Id = Guid.NewGuid(), Name = "Vegan" },
+                new MenuItemTag { Id = Guid.NewGuid(), Name = "Spicy" },
+                new MenuItemTag { Id = Guid.NewGuid(), Name = "Alcohol" },
+                new MenuItemTag { Id = Guid.NewGuid(), Name = "Non-alcohol" }
+            );
+
+            await db.SaveChangesAsync();
+        }
+
 
     }
 }

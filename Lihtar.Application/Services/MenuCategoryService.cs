@@ -15,18 +15,16 @@ public class MenuCategoryService : IMenuCategoryService
 
     public async Task<List<MenuCategoryDto>> GetAllAsync()
     {
-        var list = await _repo.GetAllAsync();
+        var items = await _repo.GetAllAsync();
 
-        return list
-            .Select(x => new MenuCategoryDto
-            {
-                Id = x.Id,
-                Name = x.Name,
-                Description = x.Description,
-                SortOrder = x.SortOrder,
-                IsActive = x.IsActive
-            })
-            .ToList();
+        return items.Select(x => new MenuCategoryDto
+        {
+            Id = x.Id,
+            Name = x.Name,
+            Description = x.Description,
+            SortOrder = x.SortOrder,
+            IsActive = x.IsActive
+        }).ToList();
     }
 
     public async Task<MenuCategoryDto?> GetByIdAsync(Guid id)
@@ -44,41 +42,51 @@ public class MenuCategoryService : IMenuCategoryService
         };
     }
 
-    public async Task<Guid> CreateAsync(MenuCategoryDto dto)
+    public async Task CreateAsync(MenuCategoryDto dto)
     {
+        // мінімальна валідація
+        if (string.IsNullOrWhiteSpace(dto.Name))
+            throw new ArgumentException("Name is required");
+
         var entity = new MenuCategory
         {
             Id = Guid.NewGuid(),
-            Name = dto.Name,
-            Description = dto.Description,
+            Name = dto.Name.Trim(),
+            Description = string.IsNullOrWhiteSpace(dto.Description) ? null : dto.Description.Trim(),
             SortOrder = dto.SortOrder,
             IsActive = dto.IsActive
         };
 
         await _repo.AddAsync(entity);
-        await _repo.SaveChangesAsync();
-        return entity.Id;
+        await _repo.SaveChangesAsync(); // ✅ ВАЖЛИВО
     }
 
     public async Task UpdateAsync(MenuCategoryDto dto)
     {
-        var entity = await _repo.GetByIdAsync(dto.Id)
-                     ?? throw new InvalidOperationException("MenuCategory not found");
+        if (dto.Id == Guid.Empty)
+            throw new ArgumentException("Id is required");
 
-        entity.Name = dto.Name;
-        entity.Description = dto.Description;
+        if (string.IsNullOrWhiteSpace(dto.Name))
+            throw new ArgumentException("Name is required");
+
+        var entity = await _repo.GetByIdAsync(dto.Id);
+        if (entity is null)
+            throw new InvalidOperationException("MenuCategory not found");
+
+        entity.Name = dto.Name.Trim();
+        entity.Description = string.IsNullOrWhiteSpace(dto.Description) ? null : dto.Description.Trim();
         entity.SortOrder = dto.SortOrder;
         entity.IsActive = dto.IsActive;
 
-        await _repo.SaveChangesAsync();
+        await _repo.SaveChangesAsync(); // ✅ ВАЖЛИВО
     }
 
     public async Task DeleteAsync(Guid id)
     {
-        var entity = await _repo.GetByIdAsync(id)
-                     ?? throw new InvalidOperationException("MenuCategory not found");
+        var entity = await _repo.GetByIdAsync(id);
+        if (entity is null) return;
 
         _repo.Remove(entity);
-        await _repo.SaveChangesAsync();
+        await _repo.SaveChangesAsync(); // ✅ ВАЖЛИВО
     }
 }

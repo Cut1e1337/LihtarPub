@@ -7,46 +7,51 @@ using Lihtar.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
+// MVC
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
-
-builder.Services.Configure<IdentityOptions>(opt =>
-{
-    opt.SignIn.RequireConfirmedEmail = true;
-});
-
-builder.Services.AddScoped<IMenuCategoryRepository, MenuCategoryRepository>();
-builder.Services.AddScoped<IMenuCategoryService, MenuCategoryService>();
-
-builder.Services.AddScoped<IMenuCategoryService, MenuCategoryService>();
-
+// DbContext
 builder.Services.AddDbContext<ArtPubDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>()
-    .AddRoles<IdentityRole<Guid>>()
-    .AddEntityFrameworkStores<ArtPubDbContext>()
-    .AddDefaultTokenProviders();
+// ---------- REPOS + SERVICES ----------
+builder.Services.AddScoped<IMenuCategoryRepository, MenuCategoryRepository>();
+builder.Services.AddScoped<IMenuCategoryService, MenuCategoryService>();
 
-builder.Services.Configure<IdentityOptions>(opt =>
+builder.Services.AddScoped<IMenuItemRepository, MenuItemRepository>();
+builder.Services.AddScoped<IMenuItemService, MenuItemService>();
+
+builder.Services.AddScoped<IMenuItemTagRepository, MenuItemTagRepository>();
+builder.Services.AddScoped<IMenuItemTagService, MenuItemTagService>();
+
+// Identity
+builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(opt =>
 {
     opt.SignIn.RequireConfirmedEmail = true;
 
+    opt.Password.RequiredLength = 6;
+    opt.Password.RequireDigit = false;
+    opt.Password.RequireUppercase = false;
+    opt.Password.RequireNonAlphanumeric = false;
+})
+.AddEntityFrameworkStores<ArtPubDbContext>()
+.AddDefaultTokenProviders();
 
-});
-
-
+// Cookies
 builder.Services.ConfigureApplicationCookie(opt =>
 {
     opt.LoginPath = "/Account/Login";
     opt.AccessDeniedPath = "/Account/Denied";
 });
 
+// Email
+builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
+
 var app = builder.Build();
+
+// ---------- SEED ----------
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ArtPubDbContext>();
@@ -56,21 +61,17 @@ using (var scope = app.Services.CreateScope())
     await DbInitializer.SeedAsync(db, userManager, roleManager);
 }
 
+// Middleware
 app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGet("/Admin", ctx =>
-{
-    ctx.Response.Redirect("/Admin/AdminHome");
-    return Task.CompletedTask;
-});
-
+// ---------- ROUTES ----------
 app.MapControllerRoute(
     name: "areas",
-    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+    pattern: "{area:exists}/{controller=AdminHome}/{action=Index}/{id?}");
 
 app.MapControllerRoute(
     name: "default",

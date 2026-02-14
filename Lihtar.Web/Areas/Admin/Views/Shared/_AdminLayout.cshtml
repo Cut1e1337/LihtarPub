@@ -1,0 +1,84 @@
+﻿<!doctype html>
+<html lang="uk">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin - Lihtar</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand"
+               asp-area="Admin" asp-controller="AdminHome" asp-action="Index">
+                Lihtar Admin
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse show" id="adminNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           asp-area="Admin" asp-controller="AdminHome" asp-action="Index">
+                            Dashboard
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           asp-area="Admin" asp-controller="MenuCategories" asp-action="Index">
+                            Menu Categories
+                        </a>
+                    </li>
+
+                    <!-- ✅ наступний пункт, який зробимо далі -->
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           asp-area="Admin" asp-controller="MenuItems" asp-action="Index">
+                            Menu Items
+                        </a>
+                    </li>
+
+                    <!-- поки що soon -->
+                    <li class="nav-item">
+                        <a class="nav-link disabled" href="#">Events (soon)</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link disabled" href="#">Users (soon)</a>
+                    </li>
+                </ul>
+
+                <div class="d-flex gap-2">
+                    <!-- ✅ ОЦЯ КНОПКА І Є “вийти на адмін-панель/дашборд” з будь-якої сторінки -->
+                    <a class="btn btn-outline-light"
+                       asp-area="Admin" asp-controller="AdminHome" asp-action="Index">
+                        Адмін-панель
+                    </a>
+
+                    <a class="btn btn-outline-light"
+                       asp-area="" asp-controller="Home" asp-action="Index">
+                        На сайт
+                    </a>
+
+                    <form asp-area="" asp-controller="Account" asp-action="Logout" method="post">
+                        @Html.AntiForgeryToken()
+                        <button class="btn btn-danger" type="submit">Logout</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mt-4">
+        @RenderBody()
+    </main>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

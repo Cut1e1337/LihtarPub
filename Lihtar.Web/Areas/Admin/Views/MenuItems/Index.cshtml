@@ -1,0 +1,47 @@
+﻿@model List<Lihtar.Application.DTOs.MenuItemDto>
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h2>Menu Items</h2>
+
+<p>
+    <a class="btn btn-primary" href="/Admin/MenuItems/Create">Create</a>
+    <a class="btn btn-outline-secondary" href="/Admin/MenuItemTags">Tags</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>CategoryId</th>
+            <th>Price</th>
+            <th>Available</th>
+            <th class="text-end">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Count > 0)
+        {
+            foreach (var x in Model)
+            {
+                <tr>
+                    <td>@x.Name</td>
+                    <td>@x.MenuCategoryId</td>
+                    <td>@x.Price</td>
+                    <td>@(x.IsAvailable ? "Yes" : "No")</td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-warning" href="/Admin/MenuItems/Edit/@x.Id">Edit</a>
+                        <a class="btn btn-sm btn-danger" href="/Admin/MenuItems/Delete/@x.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5" class="text-center text-muted">No menu items yet</td>
+            </tr>
+        }
+    </tbody>
+</table>

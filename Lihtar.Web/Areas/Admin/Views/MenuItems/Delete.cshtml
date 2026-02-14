@@ -1,0 +1,16 @@
+﻿@model Lihtar.Application.DTOs.MenuItemDto
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h2>Delete Menu Item</h2>
+
+<div class="alert alert-warning">
+    Are you sure you want to delete <b>@Model.Name</b>?
+</div>
+
+<form method="post" action="/Admin/MenuItems/Delete/@Model.Id">
+    @Html.AntiForgeryToken()
+    <button class="btn btn-danger" type="submit">Delete</button>
+    <a class="btn btn-secondary" href="/Admin/MenuItems">Cancel</a>
+</form>
