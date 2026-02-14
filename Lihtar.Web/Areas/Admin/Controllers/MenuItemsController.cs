@@ -27,6 +27,7 @@ public class MenuItemsController : AdminBaseController
         _env = env;
     }
 
+    // ---------- INDEX ----------
     [HttpGet]
     public async Task<IActionResult> Index()
     {
@@ -34,8 +35,7 @@ public class MenuItemsController : AdminBaseController
         return View(items);
     }
 
-    // ---------- CREATE ----------
-
+    // ---------- CREATE GET ----------
     [HttpGet]
     public async Task<IActionResult> Create()
     {
@@ -44,14 +44,14 @@ public class MenuItemsController : AdminBaseController
         await FillCategories();
         await FillTags(vm, new List<Guid>());
 
-        return View(vm);
+        return View(vm); // Views/Admin/MenuItems/Create.cshtml
     }
 
+    // ---------- CREATE POST ----------
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(MenuItemEditVm vm)
     {
-        // ✅ валідація категорії (бо Guid дефолт = пустий)
         if (vm.MenuCategoryId == Guid.Empty)
             ModelState.AddModelError(nameof(vm.MenuCategoryId), "Оберіть категорію");
 
@@ -80,8 +80,7 @@ public class MenuItemsController : AdminBaseController
         return RedirectToAction(nameof(Index));
     }
 
-    // ---------- EDIT ----------
-
+    // ---------- EDIT GET ----------
     [HttpGet]
     public async Task<IActionResult> Edit(Guid id)
     {
@@ -104,9 +103,10 @@ public class MenuItemsController : AdminBaseController
         await FillCategories();
         await FillTags(vm, dto.TagIds ?? new List<Guid>());
 
-        return View("Create", vm); // одна форма
+        return View(vm); // Views/Admin/MenuItems/Edit.cshtml
     }
 
+    // ---------- EDIT POST (✅ ФІКС: апдейт напряму через EF + SaveChanges) ----------
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(MenuItemEditVm vm)
@@ -116,36 +116,68 @@ public class MenuItemsController : AdminBaseController
         if (vm.MenuCategoryId == Guid.Empty)
             ModelState.AddModelError(nameof(vm.MenuCategoryId), "Оберіть категорію");
 
+        // selected tags беремо з vm.Tags
+        var selectedTagIds = vm.Tags
+            .Where(t => t.Selected)
+            .Select(t => t.Id)
+            .Distinct()
+            .ToList();
+
         if (!ModelState.IsValid)
         {
             await FillCategories();
-            await FillTags(vm, vm.SelectedTagIds);
-            return View("Create", vm);
+            await FillTags(vm, selectedTagIds);
+            return View(vm);
         }
 
-        // ✅ якщо нове фото не вибрали — лишаємо старе
-        var newImageUrl = await SaveImageAsync(vm.ImageFile);
-        var finalImageUrl = newImageUrl ?? vm.ImageUrl;
+        // 1) тягнемо entity з БД (ВАЖЛИВО: з TagLinks)
+        var entity = await _db.MenuItems
+            .Include(x => x.TagLinks)
+            .FirstOrDefaultAsync(x => x.Id == vm.Id.Value);
 
-        await _menuItemService.UpdateAsync(new MenuItemDto
+        if (entity is null) return NotFound();
+
+        // 2) фото: якщо нове не вибрали — лишаємо старе
+        var newImageUrl = await SaveImageAsync(vm.ImageFile);
+        var finalImageUrl = newImageUrl ?? entity.ImageUrl; // <- не затираємо
+
+        // 3) апдейтимо прості поля
+        entity.MenuCategoryId = vm.MenuCategoryId;
+        entity.Name = vm.Name?.Trim() ?? "";
+        entity.Description = string.IsNullOrWhiteSpace(vm.Description) ? null : vm.Description.Trim();
+        entity.Price = vm.Price;
+        entity.Calories = vm.Calories;
+        entity.WeightGrams = vm.WeightGrams;
+        entity.IsAvailable = vm.IsAvailable;
+        entity.ImageUrl = finalImageUrl;
+
+        // 4) апдейтимо теги (через link-table)
+        // прибираємо зайві
+        var toRemove = entity.TagLinks.Where(l => !selectedTagIds.Contains(l.TagId)).ToList();
+        if (toRemove.Count > 0)
+            _db.MenuItemTagLinks.RemoveRange(toRemove);
+
+        // додаємо нові
+        var existingIds = entity.TagLinks.Select(l => l.TagId).ToHashSet();
+        foreach (var tagId in selectedTagIds)
         {
-            Id = vm.Id.Value,
-            MenuCategoryId = vm.MenuCategoryId,
-            Name = vm.Name,
-            Description = vm.Description,
-            Price = vm.Price,
-            Calories = vm.Calories,
-            WeightGrams = vm.WeightGrams,
-            ImageUrl = finalImageUrl,
-            IsAvailable = vm.IsAvailable,
-            TagIds = vm.SelectedTagIds
-        });
+            if (!existingIds.Contains(tagId))
+            {
+                entity.TagLinks.Add(new Lihtar.Domain.Entities.MenuItemTagLink
+                {
+                    MenuItemId = entity.Id,
+                    TagId = tagId
+                });
+            }
+        }
+
+        // 5) SaveChanges
+        await _db.SaveChangesAsync();
 
         return RedirectToAction(nameof(Index));
     }
 
     // ---------- DELETE ----------
-
     [HttpGet]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -163,13 +195,11 @@ public class MenuItemsController : AdminBaseController
     }
 
     // ---------- HELPERS ----------
-
     private async Task FillCategories()
     {
-        // ✅ НАПРЯМУ з БД (працює 100%)
         var categories = await _db.MenuCategories
             .AsNoTracking()
-            .Where(x => x.IsActive) // якщо хочеш показувати тільки активні
+            .Where(x => x.IsActive)
             .OrderBy(x => x.SortOrder)
             .ThenBy(x => x.Name)
             .Select(x => new SelectListItem
@@ -179,9 +209,7 @@ public class MenuItemsController : AdminBaseController
             })
             .ToListAsync();
 
-        // + placeholder
         categories.Insert(0, new SelectListItem { Value = "", Text = "-- Select category --" });
-
         ViewBag.Categories = categories;
     }
 

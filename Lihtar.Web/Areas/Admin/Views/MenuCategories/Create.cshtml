@@ -1,30 +1,45 @@
 ﻿@model Lihtar.Application.DTOs.MenuCategoryDto
 
-<h2>Додати категорію</h2>
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h2>Create Menu Category</h2>
 
 <form method="post" action="/Admin/MenuCategories/Create">
     @Html.AntiForgeryToken()
 
+    <div asp-validation-summary="All" class="text-danger"></div>
+
     <div class="mb-3">
-        <label class="form-label">Назва</label>
+        <label class="form-label">Name</label>
         <input class="form-control" name="Name" value="@Model?.Name" />
+        <span class="text-danger" asp-validation-for="Name"></span>
     </div>
 
     <div class="mb-3">
-        <label class="form-label">Опис</label>
+        <label class="form-label">Description</label>
         <textarea class="form-control" name="Description" rows="4">@Model?.Description</textarea>
     </div>
 
     <div class="mb-3">
         <label class="form-label">SortOrder</label>
-        <input class="form-control" type="number" name="SortOrder" value="@Model?.SortOrder" />
+        <input class="form-control" type="number" name="SortOrder" value="@(Model?.SortOrder ?? 0)" />
     </div>
 
     <div class="form-check mb-3">
-        <input class="form-check-input" type="checkbox" name="IsActive" value="true" @(Model?.IsActive == true ? "checked" : "") />
-        <label class="form-check-label">Активна</label>
+        <input class="form-check-input"
+               type="checkbox"
+               name="IsActive"
+               value="true"
+               @(Model?.IsActive != false ? "checked" : "") />
+        <label class="form-check-label">Active</label>
     </div>
 
-    <button class="btn btn-success" type="submit">Зберегти</button>
-    <a class="btn btn-secondary" href="/Admin/MenuCategories" style="margin-left:8px;">Назад</a>
+    <button class="btn btn-success" type="submit">Save</button>
+    <a class="btn btn-secondary" href="/Admin/MenuCategories">Back</a>
 </form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

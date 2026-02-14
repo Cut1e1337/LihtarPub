@@ -1,15 +1,19 @@
 ﻿@model Lihtar.Application.DTOs.MenuCategoryDto
 
-<h2>Видалити категорію</h2>
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h2>Delete Category</h2>
 
 <div class="alert alert-warning">
-    Точно видалити категорію: <b>@Model.Name</b> ?
+    Delete category: <b>@Model.Name</b> ?
 </div>
 
-<form asp-action="Delete" method="post">
+<form method="post" action="/Admin/MenuCategories/Delete">
     @Html.AntiForgeryToken()
-    <input type="hidden" asp-for="Id" />
+    <input type="hidden" name="Id" value="@Model.Id" />
 
-    <button class="btn btn-danger" type="submit">Так, видалити</button>
-    <a class="btn btn-secondary" asp-action="Index">Скасувати</a>
+    <button class="btn btn-danger" type="submit">Yes, delete</button>
+    <a class="btn btn-secondary" href="/Admin/MenuCategories">Cancel</a>
 </form>

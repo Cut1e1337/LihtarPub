@@ -1,39 +1,52 @@
 ﻿@model List<Lihtar.Application.DTOs.MenuCategoryDto>
 
-<h2>Категорії меню</h2>
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h2>Menu Categories</h2>
 
 <p>
-    <a class="btn btn-primary" href="/Admin/MenuCategories/Create">+ Додати категорію</a>
+    <a class="btn btn-primary" href="/Admin/MenuCategories/Create">Create</a>
 </p>
 
-@if (Model == null || !Model.Any())
-{
-    <p>Поки що немає категорій. Натисни “+ Додати категорію”.</p>
-}
-else
-{
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Назва</th>
-                <th>SortOrder</th>
-                <th>Активна</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var x in Model)
+<table class="table table-striped align-middle">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th style="width:120px;">SortOrder</th>
+            <th style="width:120px;">Active</th>
+            <th class="text-end" style="width:180px;">Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @if (Model != null && Model.Count > 0)
+        {
+            foreach (var x in Model)
             {
                 <tr>
-                    <td>@x.Name</td>
+                    <td>
+                        <div class="fw-semibold">@x.Name</div>
+                        @if (!string.IsNullOrWhiteSpace(x.Description))
+                        {
+                            <div class="text-muted small">@x.Description</div>
+                        }
+                    </td>
                     <td>@x.SortOrder</td>
-                    <td>@(x.IsActive ? "Так" : "Ні")</td>
+                    <td>@(x.IsActive ? "Yes" : "No")</td>
                     <td class="text-end">
-                        <a class="btn btn-sm btn-outline-secondary" href="/Admin/MenuCategories/Edit/@x.Id">Edit</a>
-                        <a class="btn btn-sm btn-outline-danger" href="/Admin/MenuCategories/Delete/@x.Id">Delete</a>
+                        <a class="btn btn-sm btn-warning" href="/Admin/MenuCategories/Edit/@x.Id">Edit</a>
+                        <a class="btn btn-sm btn-danger" href="/Admin/MenuCategories/Delete/@x.Id">Delete</a>
                     </td>
                 </tr>
             }
-        </tbody>
-    </table>
-}
+        }
+        else
+        {
+            <tr>
+                <td colspan="4" class="text-center text-muted">No categories yet</td>
+            </tr>
+        }
+    </tbody>
+</table>
