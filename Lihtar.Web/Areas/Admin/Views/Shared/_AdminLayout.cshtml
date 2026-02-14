@@ -43,10 +43,20 @@
                         </a>
                     </li>
 
-                    <!-- поки що soon -->
                     <li class="nav-item">
-                        <a class="nav-link disabled" href="#">Events (soon)</a>
+                        <a class="nav-link"
+                           asp-area="Admin" asp-controller="Events" asp-action="Index">
+                            Events
+                        </a>
                     </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           asp-area="Admin" asp-controller="EventCategories" asp-action="Index">
+                            Event Categories
+                        </a>
+                    </li>
+
 
                     <li class="nav-item">
                         <a class="nav-link disabled" href="#">Users (soon)</a>

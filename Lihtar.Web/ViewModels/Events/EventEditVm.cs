@@ -1,4 +1,6 @@
-﻿namespace Lihtar.Web.ViewModels.Events;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+
+namespace Lihtar.Web.ViewModels.Events;
 
 public class EventEditVm
 {
@@ -14,10 +16,13 @@ public class EventEditVm
 
     public decimal Price { get; set; }
     public int TotalSeats { get; set; } = 20;
-    public int AvailableSeats { get; set; } // для показу, у Create можна ігнорувати
+    public int AvailableSeats { get; set; }
 
     public bool IsActive { get; set; } = true;
 
     public string? ImageUrl { get; set; }
     public IFormFile? ImageFile { get; set; }
+
+    // ✅ ВАЖЛИВО: категорії тепер тут, а не у ViewBag
+    public List<SelectListItem> Categories { get; set; } = new();
 }

@@ -4,8 +4,9 @@
 @{
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
     ViewData["Title"] = "Edit Event";
-    var categories = ViewBag.Categories as List<SelectListItem> ?? new();
-    var loadedCount = Math.Max(0, categories.Count - 1);
+
+    var categories = Model.Categories ?? new List<SelectListItem>();
+    var loadedCount = categories.Count > 0 ? categories.Count - 1 : 0;
 }
 
 <h2>Edit Event</h2>
@@ -19,56 +20,79 @@
     <div asp-validation-summary="All" class="text-danger"></div>
 
     <div class="mb-3">
-        <label class="form-label">Category</label>
-        <select asp-for="EventCategoryId" class="form-select" asp-items="categories"></select>
+        <label class="form-label" for="EventCategoryId">Category</label>
+
+        <select class="form-select" id="EventCategoryId" name="EventCategoryId">
+            <option value="">-- Select category --</option>
+            @foreach (var c in categories.Where(x => !string.IsNullOrWhiteSpace(x.Value)))
+            {
+                <option value="@c.Value" selected="@(c.Value == Model.EventCategoryId.ToString())">
+                    @c.Text
+                </option>
+            }
+        </select>
+
         <div class="text-muted small">Loaded categories: @loadedCount</div>
         <span class="text-danger" asp-validation-for="EventCategoryId"></span>
     </div>
 
     <div class="mb-3">
-        <label class="form-label">Title</label>
-        <input asp-for="Title" class="form-control" />
+        <label class="form-label" for="Title">Title</label>
+        <input class="form-control" id="Title" name="Title" value="@Model.Title" />
         <span class="text-danger" asp-validation-for="Title"></span>
     </div>
 
     <div class="mb-3">
-        <label class="form-label">Description</label>
-        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+        <label class="form-label" for="Description">Description</label>
+        <textarea class="form-control" id="Description" name="Description" rows="4">@Model.Description</textarea>
         <span class="text-danger" asp-validation-for="Description"></span>
     </div>
 
     <div class="row g-3 mb-3">
         <div class="col-md-4">
-            <label class="form-label">Event date</label>
-            <input asp-for="EventDate" type="datetime-local" class="form-control"
+            <label class="form-label" for="EventDate">Event date</label>
+            <input class="form-control"
+                   id="EventDate"
+                   name="EventDate"
+                   type="datetime-local"
                    value="@Model.EventDate.ToString("yyyy-MM-ddTHH:mm")" />
             <span class="text-danger" asp-validation-for="EventDate"></span>
         </div>
 
         <div class="col-md-4">
-            <label class="form-label">Duration (minutes)</label>
-            <input asp-for="DurationMinutes" class="form-control" />
+            <label class="form-label" for="DurationMinutes">Duration (minutes)</label>
+            <input class="form-control"
+                   id="DurationMinutes"
+                   name="DurationMinutes"
+                   type="number"
+                   value="@Model.DurationMinutes" />
             <span class="text-danger" asp-validation-for="DurationMinutes"></span>
         </div>
 
         <div class="col-md-4 d-flex align-items-end">
             <div class="form-check">
-                <input asp-for="IsActive" class="form-check-input" />
-                <label class="form-check-label" asp-for="IsActive">Active</label>
+                <input class="form-check-input"
+                       type="checkbox"
+                       id="IsActive"
+                       name="IsActive"
+                       value="true"
+                       @(Model.IsActive ? "checked" : "") />
+                <input type="hidden" name="IsActive" value="false" />
+                <label class="form-check-label" for="IsActive">Active</label>
             </div>
         </div>
     </div>
 
     <div class="row g-3 mb-3">
         <div class="col-md-4">
-            <label class="form-label">Price</label>
-            <input asp-for="Price" class="form-control" />
+            <label class="form-label" for="Price">Price</label>
+            <input class="form-control" id="Price" name="Price" type="number" step="0.01" value="@Model.Price" />
             <span class="text-danger" asp-validation-for="Price"></span>
         </div>
 
         <div class="col-md-4">
-            <label class="form-label">Total seats</label>
-            <input asp-for="TotalSeats" class="form-control" />
+            <label class="form-label" for="TotalSeats">Total seats</label>
+            <input class="form-control" id="TotalSeats" name="TotalSeats" type="number" value="@Model.TotalSeats" />
             <span class="text-danger" asp-validation-for="TotalSeats"></span>
             <div class="text-muted small">Available seats will be recalculated.</div>
         </div>
@@ -88,8 +112,8 @@
     }
 
     <div class="mb-3">
-        <label class="form-label">Replace photo</label>
-        <input asp-for="ImageFile" type="file" class="form-control" accept=".jpg,.jpeg,.png,.webp" />
+        <label class="form-label" for="ImageFile">Replace photo</label>
+        <input class="form-control" id="ImageFile" name="ImageFile" type="file" accept=".jpg,.jpeg,.png,.webp" />
         <span class="text-danger" asp-validation-for="ImageFile"></span>
         <div class="text-muted small">Allowed: jpg / jpeg / png / webp</div>
     </div>

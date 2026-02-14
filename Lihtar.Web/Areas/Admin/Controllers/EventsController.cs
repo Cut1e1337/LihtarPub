@@ -30,19 +30,21 @@ public class EventsController : AdminBaseController
         return View(list);
     }
 
+    // ---------------- CREATE ----------------
+
     [HttpGet]
     public async Task<IActionResult> Create()
     {
-        await FillCategories();
-
         var vm = new EventEditVm
         {
             IsActive = true,
             EventDate = DateTime.Now.AddDays(1),
             DurationMinutes = 60,
-            TotalSeats = 20
+            TotalSeats = 20,
+            Price = 0
         };
 
+        await PopulateCategories(vm);
         return View(vm);
     }
 
@@ -54,7 +56,7 @@ public class EventsController : AdminBaseController
 
         if (!ModelState.IsValid)
         {
-            await FillCategories();
+            await PopulateCategories(vm);
             return View(vm);
         }
 
@@ -62,7 +64,7 @@ public class EventsController : AdminBaseController
         if (vm.ImageFile is not null && imageUrl is null)
         {
             ModelState.AddModelError(nameof(vm.ImageFile), "Дозволено тільки jpg/jpeg/png/webp");
-            await FillCategories();
+            await PopulateCategories(vm);
             return View(vm);
         }
 
@@ -84,8 +86,11 @@ public class EventsController : AdminBaseController
         _db.Events.Add(entity);
         await _db.SaveChangesAsync();
 
+        TempData["Success"] = "Подію створено ✅";
         return RedirectToAction(nameof(Index));
     }
+
+    // ---------------- EDIT ----------------
 
     [HttpGet]
     public async Task<IActionResult> Edit(Guid id)
@@ -95,8 +100,6 @@ public class EventsController : AdminBaseController
             .FirstOrDefaultAsync(x => x.Id == id);
 
         if (entity is null) return NotFound();
-
-        await FillCategories();
 
         var vm = new EventEditVm
         {
@@ -113,6 +116,7 @@ public class EventsController : AdminBaseController
             IsActive = entity.IsActive
         };
 
+        await PopulateCategories(vm);
         return View(vm);
     }
 
@@ -122,8 +126,6 @@ public class EventsController : AdminBaseController
     {
         if (vm.Id is null) return NotFound();
 
-        ValidateEventVm(vm);
-
         var entity = await _db.Events
             .Include(x => x.Tickets)
             .FirstOrDefaultAsync(x => x.Id == vm.Id.Value);
@@ -132,14 +134,17 @@ public class EventsController : AdminBaseController
 
         // seats safety: TotalSeats >= sold
         var sold = entity.TotalSeats - entity.AvailableSeats;
+
+        ValidateEventVm(vm);
         if (vm.TotalSeats < sold)
-            ModelState.AddModelError(nameof(vm.TotalSeats), $"Вже продано {sold} квитків. TotalSeats не може бути меншим.");
+            ModelState.AddModelError(nameof(vm.TotalSeats),
+                $"Вже продано {sold} квитків. TotalSeats не може бути меншим.");
 
         if (!ModelState.IsValid)
         {
-            await FillCategories();
             vm.ImageUrl = entity.ImageUrl;
             vm.AvailableSeats = entity.AvailableSeats;
+            await PopulateCategories(vm);
             return View(vm);
         }
 
@@ -148,13 +153,11 @@ public class EventsController : AdminBaseController
         if (vm.ImageFile is not null && newImageUrl is null)
         {
             ModelState.AddModelError(nameof(vm.ImageFile), "Дозволено тільки jpg/jpeg/png/webp");
-            await FillCategories();
             vm.ImageUrl = entity.ImageUrl;
             vm.AvailableSeats = entity.AvailableSeats;
+            await PopulateCategories(vm);
             return View(vm);
         }
-
-        var finalImageUrl = newImageUrl ?? entity.ImageUrl;
 
         entity.EventCategoryId = vm.EventCategoryId;
         entity.Title = vm.Title.Trim();
@@ -166,12 +169,16 @@ public class EventsController : AdminBaseController
         entity.TotalSeats = vm.TotalSeats;
         entity.AvailableSeats = vm.TotalSeats - sold;
 
-        entity.ImageUrl = finalImageUrl;
+        entity.ImageUrl = newImageUrl ?? entity.ImageUrl;
         entity.IsActive = vm.IsActive;
 
         await _db.SaveChangesAsync();
+
+        TempData["Success"] = "Подію оновлено ✅";
         return RedirectToAction(nameof(Index));
     }
+
+    // ---------------- DELETE ----------------
 
     [HttpGet]
     public async Task<IActionResult> Delete(Guid id)
@@ -185,7 +192,6 @@ public class EventsController : AdminBaseController
         return View(entity);
     }
 
-    // ✅ важливо: інша назва, щоб не було плутанини
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(Guid id)
@@ -204,8 +210,12 @@ public class EventsController : AdminBaseController
 
         _db.Events.Remove(entity);
         await _db.SaveChangesAsync();
+
+        TempData["Success"] = "Подію видалено ✅";
         return RedirectToAction(nameof(Index));
     }
+
+    // ---------------- helpers ----------------
 
     private void ValidateEventVm(EventEditVm vm)
     {
@@ -224,13 +234,14 @@ public class EventsController : AdminBaseController
         if (vm.Price < 0)
             ModelState.AddModelError(nameof(vm.Price), "Price must be >= 0");
 
+        // в Edit дозволяємо минулу дату? якщо ні — залишай як є
         if (vm.EventDate < DateTime.Now)
             ModelState.AddModelError(nameof(vm.EventDate), "Дата події має бути в майбутньому");
     }
 
-    private async Task FillCategories()
+    private async Task PopulateCategories(EventEditVm vm)
     {
-        var categories = await _db.EventCategories
+        vm.Categories = await _db.EventCategories
             .AsNoTracking()
             .OrderBy(x => x.Name)
             .Select(x => new SelectListItem
@@ -240,8 +251,7 @@ public class EventsController : AdminBaseController
             })
             .ToListAsync();
 
-        categories.Insert(0, new SelectListItem { Value = "", Text = "-- Select category --" });
-        ViewBag.Categories = categories;
+        vm.Categories.Insert(0, new SelectListItem { Value = "", Text = "-- Select category --" });
     }
 
     private async Task<string?> SaveImageAsync(IFormFile? file)

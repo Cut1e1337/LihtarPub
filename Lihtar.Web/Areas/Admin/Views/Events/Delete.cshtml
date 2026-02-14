@@ -1,14 +1,20 @@
 ﻿@model Lihtar.Domain.Entities.Event
 
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Delete Event";
+}
+
 <h2>Delete Event</h2>
 
 <div class="alert alert-warning">
     Delete event: <strong>@Model.Title</strong> (@Model.EventDate.ToString("yyyy-MM-dd HH:mm")) ?
 </div>
 
-<form asp-action="DeleteConfirmed" method="post">
+<form method="post"
+      action="@Url.Action("DeleteConfirmed", "Events", new { area = "Admin", id = Model.Id })">
     @Html.AntiForgeryToken()
-    <input type="hidden" name="id" value="@Model.Id" />
+
     <button class="btn btn-danger" type="submit">Delete</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    <a class="btn btn-secondary" href="@Url.Action("Index", "Events", new { area = "Admin" })">Cancel</a>
 </form>
