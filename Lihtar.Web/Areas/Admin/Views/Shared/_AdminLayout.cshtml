@@ -35,7 +35,6 @@
                         </a>
                     </li>
 
-                    <!-- ✅ наступний пункт, який зробимо далі -->
                     <li class="nav-item">
                         <a class="nav-link"
                            asp-area="Admin" asp-controller="MenuItems" asp-action="Index">
@@ -51,21 +50,22 @@
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" asp-area="Admin" asp-controller="Users" asp-action="Index">
-                            Users
+                        <a class="nav-link"
+                           asp-area="Admin" asp-controller="EventCategories" asp-action="Index">
+                            Event Categories
                         </a>
-
                     </li>
 
-
+                    <!-- ✅ USERS ТІЛЬКИ ОДИН -->
                     <li class="nav-item">
-                        <a class="nav-link" href="/Admin/Users">Users</a>
-
+                        <a class="nav-link"
+                           asp-area="Admin" asp-controller="Users" asp-action="Index">
+                            Users
+                        </a>
                     </li>
                 </ul>
 
                 <div class="d-flex gap-2">
-                    <!-- ✅ ОЦЯ КНОПКА І Є “вийти на адмін-панель/дашборд” з будь-якої сторінки -->
                     <a class="btn btn-outline-light"
                        asp-area="Admin" asp-controller="AdminHome" asp-action="Index">
                         Адмін-панель
