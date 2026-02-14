@@ -1,0 +1,14 @@
+﻿@model Lihtar.Domain.Entities.Event
+
+<h2>Delete Event</h2>
+
+<div class="alert alert-warning">
+    Delete event: <strong>@Model.Title</strong> (@Model.EventDate.ToString("yyyy-MM-dd HH:mm")) ?
+</div>
+
+<form asp-action="DeleteConfirmed" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" value="@Model.Id" />
+    <button class="btn btn-danger" type="submit">Delete</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

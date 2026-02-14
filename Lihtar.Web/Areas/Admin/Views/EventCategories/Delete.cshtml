@@ -1,0 +1,21 @@
+﻿@model Lihtar.Domain.Entities.EventCategory
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Delete Event Category";
+}
+
+<h2>Delete Event Category</h2>
+
+<div class="alert alert-warning">
+    Точно видалити категорію <b>@Model.Name</b>?
+</div>
+
+<form method="post" action="@Url.Action("Delete", "EventCategories", new { area = "Admin" })">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" value="@Model.Id" />
+
+    <button class="btn btn-danger" type="submit">Delete</button>
+    <a class="btn btn-secondary"
+       href="@Url.Action("Index", "EventCategories", new { area = "Admin" })">Cancel</a>
+</form>

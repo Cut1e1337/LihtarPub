@@ -27,13 +27,23 @@
             border-color: #6c757d;
         }
 
+        .admin-btn.green {
+            background: #198754;
+            border-color: #198754;
+        }
+
+        .admin-btn.purple {
+            background: #6f42c1;
+            border-color: #6f42c1;
+        }
+
         .admin-btn.disabled {
             opacity: .55;
             pointer-events: none;
         }
 </style>
 
-<!-- ✅ Тут ЗВИЧАЙНИЙ href, без asp-* -->
+<!-- ✅ Меню -->
 <a class="admin-btn" href="/Admin/MenuCategories">
     🍽 Категорії меню
 </a>
@@ -42,13 +52,16 @@
     🍽 Позиції меню
 </a>
 
-
-
-
-<a class="admin-btn gray disabled" href="#">
-    🎉 Події (скоро)
+<!-- ✅ Події (НОВЕ) -->
+<a class="admin-btn green" href="/Admin/EventCategories">
+    🎉 Категорії подій
 </a>
 
-<a class="admin-btn gray disabled" href="#">
+<a class="admin-btn green" href="/Admin/Events">
+    🎉 Події
+</a>
+
+<!-- ✅ Користувачі (якщо контролера ще нема — залишай disabled) -->
+<a class="admin-btn purple disabled" href="#">
     👤 Користувачі (скоро)
 </a>

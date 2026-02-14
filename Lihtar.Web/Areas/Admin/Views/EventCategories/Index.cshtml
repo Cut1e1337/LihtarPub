@@ -1,0 +1,64 @@
+﻿@model List<Lihtar.Domain.Entities.EventCategory>
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Event Categories";
+}
+
+<h2>Event Categories</h2>
+
+@if (TempData["Success"] is string ok)
+{
+    <div class="alert alert-success">@ok</div>
+}
+@if (TempData["Error"] is string err)
+{
+    <div class="alert alert-danger">@err</div>
+}
+
+<p>
+    <a class="btn btn-primary"
+       href="@Url.Action("Create", "EventCategories", new { area = "Admin" })">
+        Create
+    </a>
+</p>
+
+<table class="table table-striped align-middle">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th class="text-end" style="width:220px;">Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @if (Model != null && Model.Count > 0)
+        {
+            foreach (var x in Model)
+            {
+                <tr>
+                    <td class="fw-semibold">@x.Name</td>
+                    <td class="text-muted small">@x.Description</td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-warning"
+                           href="@Url.Action("Edit", "EventCategories", new { area = "Admin", id = x.Id })">
+                            Edit
+                        </a>
+
+                        <a class="btn btn-sm btn-danger"
+                           href="@Url.Action("Delete", "EventCategories", new { area = "Admin", id = x.Id })">
+                            Delete
+                        </a>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="3" class="text-center text-muted">No categories yet</td>
+            </tr>
+        }
+    </tbody>
+</table>

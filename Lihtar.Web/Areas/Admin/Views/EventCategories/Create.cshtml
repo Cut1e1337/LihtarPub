@@ -1,0 +1,36 @@
+﻿@model Lihtar.Web.ViewModels.Events.EventCategoryEditVm
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Create Event Category";
+}
+
+<h2>Create Event Category</h2>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        @foreach (var e in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <div>@e.ErrorMessage</div>
+        }
+    </div>
+}
+
+<form method="post" action="@Url.Action("Create", "EventCategories", new { area = "Admin" })">
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label class="form-label">Name</label>
+        <input class="form-control" name="Name" value="@Model?.Name" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Description</label>
+        <textarea class="form-control" name="Description" rows="4">@Model?.Description</textarea>
+    </div>
+
+    <button class="btn btn-success" type="submit">Save</button>
+    <a class="btn btn-secondary"
+       href="@Url.Action("Index", "EventCategories", new { area = "Admin" })">Back</a>
+</form>

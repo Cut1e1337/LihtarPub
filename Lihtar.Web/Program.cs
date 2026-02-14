@@ -15,6 +15,11 @@ builder.Services.AddControllersWithViews();
 // DbContext
 builder.Services.AddDbContext<ArtPubDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddScoped<IEventCategoryRepository, EventCategoryRepository>();
+builder.Services.AddScoped<IEventCategoryService, EventCategoryService>();
+
+builder.Services.AddScoped<IEventRepository, EventRepository>();
+builder.Services.AddScoped<IEventService, EventService>();
 
 // ---------- REPOS + SERVICES ----------
 builder.Services.AddScoped<IMenuCategoryRepository, MenuCategoryRepository>();

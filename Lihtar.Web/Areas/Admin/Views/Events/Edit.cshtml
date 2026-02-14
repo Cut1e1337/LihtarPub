@@ -1,0 +1,103 @@
+﻿@model Lihtar.Web.ViewModels.Events.EventEditVm
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Edit Event";
+    var categories = ViewBag.Categories as List<SelectListItem> ?? new();
+    var loadedCount = Math.Max(0, categories.Count - 1);
+}
+
+<h2>Edit Event</h2>
+
+<form method="post" asp-area="Admin" asp-controller="Events" asp-action="Edit" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="ImageUrl" />
+
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label class="form-label">Category</label>
+        <select asp-for="EventCategoryId" class="form-select" asp-items="categories"></select>
+        <div class="text-muted small">Loaded categories: @loadedCount</div>
+        <span class="text-danger" asp-validation-for="EventCategoryId"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Title</label>
+        <input asp-for="Title" class="form-control" />
+        <span class="text-danger" asp-validation-for="Title"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Description</label>
+        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+        <span class="text-danger" asp-validation-for="Description"></span>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-md-4">
+            <label class="form-label">Event date</label>
+            <input asp-for="EventDate" type="datetime-local" class="form-control"
+                   value="@Model.EventDate.ToString("yyyy-MM-ddTHH:mm")" />
+            <span class="text-danger" asp-validation-for="EventDate"></span>
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label">Duration (minutes)</label>
+            <input asp-for="DurationMinutes" class="form-control" />
+            <span class="text-danger" asp-validation-for="DurationMinutes"></span>
+        </div>
+
+        <div class="col-md-4 d-flex align-items-end">
+            <div class="form-check">
+                <input asp-for="IsActive" class="form-check-input" />
+                <label class="form-check-label" asp-for="IsActive">Active</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-md-4">
+            <label class="form-label">Price</label>
+            <input asp-for="Price" class="form-control" />
+            <span class="text-danger" asp-validation-for="Price"></span>
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label">Total seats</label>
+            <input asp-for="TotalSeats" class="form-control" />
+            <span class="text-danger" asp-validation-for="TotalSeats"></span>
+            <div class="text-muted small">Available seats will be recalculated.</div>
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label">Available seats</label>
+            <input class="form-control" value="@Model.AvailableSeats" readonly />
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+    {
+        <div class="mb-3">
+            <div class="text-muted small mb-1">Current photo:</div>
+            <img src="@Model.ImageUrl" style="max-width:260px; border-radius:10px;" />
+        </div>
+    }
+
+    <div class="mb-3">
+        <label class="form-label">Replace photo</label>
+        <input asp-for="ImageFile" type="file" class="form-control" accept=".jpg,.jpeg,.png,.webp" />
+        <span class="text-danger" asp-validation-for="ImageFile"></span>
+        <div class="text-muted small">Allowed: jpg / jpeg / png / webp</div>
+    </div>
+
+    <button class="btn btn-success" type="submit">Save</button>
+    <a class="btn btn-secondary" href="/Admin/Events">Back</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

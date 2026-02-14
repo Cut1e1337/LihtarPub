@@ -6,16 +6,20 @@ namespace Lihtar.Infrastructure.Data.Configurations;
 
 public class EventReviewConfiguration : IEntityTypeConfiguration<EventReview>
 {
-    public void Configure(EntityTypeBuilder<EventReview> b)
+    public void Configure(EntityTypeBuilder<EventReview> builder)
     {
-        b.HasKey(x => new { x.ReviewId, x.EventId });
+        builder.ToTable("EventReviews");
 
-        b.HasOne(x => x.Review)
-            .WithMany(x => x.EventReviews)
-            .HasForeignKey(x => x.ReviewId);
+        builder.HasKey(x => new { x.EventId, x.ReviewId });
 
-        b.HasOne(x => x.Event)
+        builder.HasOne(x => x.Event)
             .WithMany(x => x.EventReviews)
-            .HasForeignKey(x => x.EventId);
+            .HasForeignKey(x => x.EventId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.Review)
+            .WithMany() // якщо в Review немає колекції EventReviews — так і треба
+            .HasForeignKey(x => x.ReviewId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
