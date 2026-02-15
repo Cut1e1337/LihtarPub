@@ -1,0 +1,140 @@
+﻿@model Lihtar.Web.ViewModels.PublicEvents.PublicEventDetailsVm
+@{
+    ViewData["Title"] = Model.Title;
+    Layout = "_Layout";
+}
+
+<div class="container py-4">
+
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+            <h2 class="mb-0">@Model.Title</h2>
+            <div class="text-muted small">@Model.CategoryName</div>
+        </div>
+
+        <a class="btn btn-outline-secondary" asp-controller="PublicEvents" asp-action="Index">
+            ← Назад
+        </a>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <div class="row g-3">
+        <div class="col-lg-5">
+            <div class="card shadow-sm">
+                @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+                {
+                    <img src="@Model.ImageUrl" class="card-img-top" style="height:280px; object-fit:cover;" />
+                }
+                else
+                {
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="height:280px;">
+                        <span class="text-muted">No image</span>
+                    </div>
+                }
+
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2 mb-2">
+                        <span class="badge bg-secondary">@Model.CategoryName</span>
+                        <span class="badge bg-info text-dark">@Model.EventDate.ToString("dd.MM.yyyy HH:mm")</span>
+                        <span class="badge bg-light text-dark border">@Model.DurationMinutes хв</span>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge bg-success">₴ @Model.Price</span>
+                        <span class="badge bg-warning text-dark">Місця: @Model.AvailableSeats / @Model.TotalSeats</span>
+                        @if (Model.IsActive)
+                        {
+                            <span class="badge bg-primary">Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Inactive</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="card-footer bg-white">
+                    @if (User.Identity?.IsAuthenticated ?? false)
+                    {
+                        <form asp-controller="PublicEvents" asp-action="Book" method="post" class="d-grid">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.Id" />
+
+                            <button class="btn btn-primary"
+                                    type="submit"
+                                    @(Model.CanBook ? "" : "disabled")>
+                                Забронювати місце
+                            </button>
+                        </form>
+
+                        @if (!Model.CanBook)
+                        {
+                            <div class="text-muted small mt-2">
+                                Бронювання недоступне (подія неактивна / вже пройшла / немає місць).
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <a class="btn btn-primary w-100"
+                           asp-controller="Account"
+                           asp-action="Login">
+                            Увійти щоб забронювати
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="mb-2">Опис</h5>
+
+                    @if (string.IsNullOrWhiteSpace(Model.Description))
+                    {
+                        <div class="text-muted">Опис відсутній.</div>
+                    }
+                    else
+                    {
+                        <div style="white-space:pre-line;">@Model.Description</div>
+                    }
+
+                    <hr />
+
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <div class="text-muted small">Дата і час</div>
+                            <div class="fw-semibold">@Model.EventDate.ToString("dd.MM.yyyy HH:mm")</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="text-muted small">Тривалість</div>
+                            <div class="fw-semibold">@Model.DurationMinutes хв</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="text-muted small">Ціна</div>
+                            <div class="fw-semibold">₴ @Model.Price</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="text-muted small">Вільні місця</div>
+                            <div class="fw-semibold">@Model.AvailableSeats / @Model.TotalSeats</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
