@@ -7,83 +7,128 @@
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/Lihtar.Web.styles.css" asp-append-version="true" />
 </head>
+
 <body class="bg-light">
 
+    <!-- ================= NAVBAR ================= -->
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
             <div class="container">
-                <a class="navbar-brand fw-semibold" asp-area="" asp-controller="Home" asp-action="Index">
+
+                <!-- LOGO -->
+                <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">
                     Lihtar
                 </a>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
-                        aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#mainNav">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
                 <div class="collapse navbar-collapse" id="mainNav">
+
+                    <!-- LEFT MENU -->
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Головна</a>
+                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active fw-semibold" : "")"
+                               asp-controller="Home"
+                               asp-action="Index">
+                                Головна
+                            </a>
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Menu" asp-action="Index">Меню</a>
+                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Menu" ? "active fw-semibold" : "")"
+                               asp-controller="Menu"
+                               asp-action="Index">
+                                Меню
+                            </a>
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Events" asp-action="Index">Події</a>
+                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "PublicEvents" ? "active fw-semibold" : "")"
+                               asp-controller="PublicEvents"
+                               asp-action="Index">
+                                Події
+                            </a>
                         </li>
 
-                        @* Admin link (only for Admin role) *@
                         @if (User.IsInRole("Admin"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-area="Admin" asp-controller="AdminHome" asp-action="Index">
+                                <a class="nav-link"
+                                   asp-area="Admin"
+                                   asp-controller="AdminHome"
+                                   asp-action="Index">
                                     Admin
                                 </a>
                             </li>
                         }
                     </ul>
 
-                    <div class="d-flex gap-2 align-items-center">
+                    <!-- RIGHT SIDE -->
+                    <div class="d-flex align-items-center gap-3">
+
                         @if (User?.Identity?.IsAuthenticated ?? false)
                         {
-                            <span class="text-light small me-2">
-                                @User.Identity!.Name
+                            <span class="text-light small">
+                                👤 @User.Identity!.Name
                             </span>
 
-                            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                            <form asp-controller="Account"
+                                  asp-action="Logout"
+                                  method="post"
+                                  class="d-inline">
                                 @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
+                                <button type="submit"
+                                        class="btn btn-outline-light btn-sm">
+                                    Logout
+                                </button>
                             </form>
                         }
                         else
                         {
-                            <a class="btn btn-outline-light btn-sm" asp-controller="Account" asp-action="Login">Login</a>
-                            <a class="btn btn-primary btn-sm" asp-controller="Account" asp-action="Register">Register</a>
+                            <a class="btn btn-outline-light btn-sm"
+                               asp-controller="Account"
+                               asp-action="Login">
+                                Login
+                            </a>
+
+                            <a class="btn btn-primary btn-sm"
+                               asp-controller="Account"
+                               asp-action="Register">
+                                Register
+                            </a>
                         }
                     </div>
+
                 </div>
             </div>
         </nav>
     </header>
 
+    <!-- ================= MAIN CONTENT ================= -->
     <main class="container py-4">
         @RenderBody()
     </main>
 
-    <footer class="border-top bg-white">
-        <div class="container py-3 text-muted small d-flex justify-content-between">
+    <!-- ================= FOOTER ================= -->
+    <footer class="border-top bg-white mt-5">
+        <div class="container py-3 d-flex justify-content-between small text-muted">
             <div>&copy; @DateTime.Now.Year Lihtar</div>
-            <a class="text-muted" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+
+            <a class="text-muted text-decoration-none"
+               asp-controller="Home"
+               asp-action="Privacy">
+                Privacy
+            </a>
         </div>
     </footer>
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

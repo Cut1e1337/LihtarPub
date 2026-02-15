@@ -1,0 +1,147 @@
+﻿@model Lihtar.Web.ViewModels.PublicEvents.PublicEventsIndexVm
+@{
+    ViewData["Title"] = "Events";
+    Layout = "_Layout";
+}
+
+<div class="container py-4">
+    <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
+        <div>
+            <h2 class="mb-1">Events</h2>
+            <div class="text-muted small">Choose an event and book your seats</div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary"
+               href="@Url.Action("Index", "PublicEvents", new { q = Model.Q, categoryId = Model.CategoryId, onlyUpcoming = Model.OnlyUpcoming, onlyActive = Model.OnlyActive, page = 1, pageSize = Model.PageSize })">
+                Refresh
+            </a>
+        </div>
+    </div>
+
+    <form method="get" class="card shadow-sm mb-3">
+        <div class="card-body">
+            <div class="row g-2 align-items-center">
+                <div class="col-lg-5">
+                    <input class="form-control" name="q" value="@Model.Q" placeholder="Search by title / description..." />
+                </div>
+
+                <div class="col-lg-3">
+                    <select class="form-select" name="categoryId">
+                        <option value="">All categories</option>
+                        @foreach (var c in Model.Categories)
+                        {
+                            <option value="@c.Id" selected="@(Model.CategoryId == c.Id)">
+                                @c.Name (@c.Count)
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-lg-2">
+                    <select class="form-select" name="pageSize">
+                        <option value="12" selected="@(Model.PageSize == 12)">12</option>
+                        <option value="24" selected="@(Model.PageSize == 24)">24</option>
+                        <option value="36" selected="@(Model.PageSize == 36)">36</option>
+                        <option value="48" selected="@(Model.PageSize == 48)">48</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-2 d-grid">
+                    <button class="btn btn-primary" type="submit">Search</button>
+                </div>
+
+                <div class="col-12 mt-2 d-flex flex-wrap gap-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="onlyUpcoming" value="true" @(Model.OnlyUpcoming ? "checked" : "") />
+                        <label class="form-check-label">Only upcoming</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="onlyActive" value="true" @(Model.OnlyActive ? "checked" : "") />
+                        <label class="form-check-label">Only active</label>
+                    </div>
+
+                    <a class="btn btn-sm btn-outline-secondary ms-auto"
+                       href="@Url.Action("Index", "PublicEvents", new { onlyUpcoming = true, onlyActive = true, page = 1, pageSize = 12 })">
+                        Reset
+                    </a>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    @if (Model.Items.Count == 0)
+    {
+        <div class="alert alert-light border">
+            No events found. Try changing filters.
+        </div>
+    }
+    else
+    {
+        <div class="row g-3">
+            @foreach (var x in Model.Items)
+            {
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card shadow-sm h-100">
+                        @if (!string.IsNullOrWhiteSpace(x.ImageUrl))
+                        {
+                            <img src="@x.ImageUrl" class="card-img-top" style="height:200px; object-fit:cover;" />
+                        }
+                        else
+                        {
+                            <div class="bg-light d-flex align-items-center justify-content-center" style="height:200px;">
+                                <span class="text-muted">No image</span>
+                            </div>
+                        }
+
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                <h5 class="card-title mb-1">@x.Title</h5>
+                                <span class="badge bg-secondary">@x.CategoryName</span>
+                            </div>
+
+                            <div class="text-muted small mb-2">
+                                @x.EventDate.ToString("dd.MM.yyyy HH:mm") • @x.DurationMinutes хв
+                            </div>
+
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="badge bg-success">₴ @x.Price</span>
+                                <span class="badge bg-info text-dark">Seats: @x.AvailableSeats / @x.TotalSeats</span>
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-white border-0 pt-0">
+                            <div class="d-flex gap-2">
+                                <a class="btn btn-outline-primary w-100"
+                                   href="@Url.Action("Details", "PublicEvents", new { id = x.Id })">
+                                    Details
+                                </a>
+                                <button class="btn btn-primary w-100" type="button" disabled>
+                                    Book (soon)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @if (Model.TotalPages > 1)
+        {
+            <nav class="mt-4">
+                <ul class="pagination">
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == Model.Page ? "active" : "")">
+                            <a class="page-link"
+                               href="@Url.Action("Index", "PublicEvents", new { q = Model.Q, categoryId = Model.CategoryId, onlyUpcoming = Model.OnlyUpcoming, onlyActive = Model.OnlyActive, page = i, pageSize = Model.PageSize })">
+                                @i
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    }
+</div>
