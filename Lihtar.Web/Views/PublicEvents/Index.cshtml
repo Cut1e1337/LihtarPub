@@ -111,16 +111,44 @@
                             </div>
                         </div>
 
+                        <!-- ✅ ОЦЕ ЄДИНЕ, ЩО ЗМІНЕНО: Book працює -->
                         <div class="card-footer bg-white border-0 pt-0">
                             <div class="d-flex gap-2">
                                 <a class="btn btn-outline-primary w-100"
                                    href="@Url.Action("Details", "PublicEvents", new { id = x.Id })">
                                     Details
                                 </a>
-                                <button class="btn btn-primary w-100" type="button" disabled>
-                                    Book (soon)
-                                </button>
+
+                                @if (User.Identity?.IsAuthenticated ?? false)
+                                {
+                                    <form asp-controller="PublicEvents"
+                                          asp-action="Book"
+                                          method="post"
+                                          class="w-100">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@x.Id" />
+
+                                        <button class="btn btn-primary w-100"
+                                                type="submit"
+                                                @(x.AvailableSeats > 0 ? "" : "disabled")>
+                                            Book
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <a class="btn btn-primary w-100"
+                                       asp-controller="Account"
+                                       asp-action="Login">
+                                        Login to book
+                                    </a>
+                                }
                             </div>
+
+                            @if (x.AvailableSeats <= 0)
+                            {
+                                <div class="text-muted small mt-2">Немає вільних місць.</div>
+                            }
                         </div>
                     </div>
                 </div>

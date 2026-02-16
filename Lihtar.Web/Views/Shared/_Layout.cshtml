@@ -24,7 +24,10 @@
                 <button class="navbar-toggler"
                         type="button"
                         data-bs-toggle="collapse"
-                        data-bs-target="#mainNav">
+                        data-bs-target="#mainNav"
+                        aria-controls="mainNav"
+                        aria-expanded="false"
+                        aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
@@ -32,7 +35,6 @@
 
                     <!-- LEFT MENU -->
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-
                         <li class="nav-item">
                             <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active fw-semibold" : "")"
                                asp-controller="Home"
@@ -71,12 +73,11 @@
                     </ul>
 
                     <!-- RIGHT SIDE -->
-                    <div class="d-flex align-items-center gap-3">
-
+                    <div class="d-flex align-items-center gap-2">
                         @if (User?.Identity?.IsAuthenticated ?? false)
                         {
-                            <span class="text-light small">
-                                👤 @User.Identity!.Name
+                            <span class="text-light small me-2">
+                                @User.Identity!.Name
                             </span>
 
                             <form asp-controller="Account"
@@ -84,8 +85,7 @@
                                   method="post"
                                   class="d-inline">
                                 @Html.AntiForgeryToken()
-                                <button type="submit"
-                                        class="btn btn-outline-light btn-sm">
+                                <button type="submit" class="btn btn-outline-light btn-sm">
                                     Logout
                                 </button>
                             </form>
@@ -129,6 +129,10 @@
         </div>
     </footer>
 
+    <!-- scripts -->
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

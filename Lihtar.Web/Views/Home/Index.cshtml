@@ -1,8 +1,149 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Головна";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!-- HERO -->
+<section class="rounded-4 overflow-hidden shadow-sm position-relative mb-4"
+         style="background: linear-gradient(120deg, #0b1220, #111827);">
+    <div class="row g-0 align-items-stretch">
+        <div class="col-lg-6 p-4 p-md-5 text-white">
+            <div class="badge text-bg-light text-dark mb-3">Art Pub • Live • Events</div>
+
+            <h1 class="display-5 fw-bold mb-3">
+                Lihtar — місце, де музика і атмосфера живуть
+            </h1>
+
+            <p class="lead text-white-50 mb-4">
+                Авторські напої, кухня, живі виступи та події. Обирай меню, бронюй місця на івенти і заходь за вайбом 🔥
+            </p>
+
+            <div class="d-flex flex-wrap gap-2">
+                <a class="btn btn-primary btn-lg" asp-controller="Menu" asp-action="Index">Перейти в Меню</a>
+                <a class="btn btn-outline-light btn-lg" asp-controller="PublicEvents" asp-action="Index">Переглянути Події</a>
+            </div>
+
+            <div class="mt-4 d-flex gap-3 text-white-50 small">
+                <div>• Live музика</div>
+                <div>• Сцена</div>
+                <div>• Коктейлі</div>
+                <div>• Атмосфера</div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <!-- Bootstrap Carousel -->
+            <div id="homeCarousel" class="carousel slide h-100" data-bs-ride="carousel">
+                <div class="carousel-inner h-100">
+                    <div class="carousel-item active h-100">
+                        <div class="h-100 w-100"
+                             style="background-image:url('/img/home/crowd.jpg'); background-size:cover; background-position:center;">
+                        </div>
+                    </div>
+                    <div class="carousel-item h-100">
+                        <div class="h-100 w-100"
+                             style="background-image:url('/img/home/singer.jpg'); background-size:cover; background-position:center;">
+                        </div>
+                    </div>
+                    <div class="carousel-item h-100">
+                        <div class="h-100 w-100"
+                             style="background-image:url('/img/home/guitar.jpg'); background-size:cover; background-position:center;">
+                        </div>
+                    </div>
+                </div>
+
+                <button class="carousel-control-prev" type="button" data-bs-target="#homeCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#homeCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="position-absolute top-0 end-0 bottom-0 start-0"
+         style="background: radial-gradient(transparent 40%, rgba(0,0,0,.35)); pointer-events:none;"></div>
+</section>
+
+<!-- FEATURES -->
+<section class="mb-4">
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <div class="fw-semibold mb-1">Меню</div>
+                    <div class="text-muted small mb-3">Пошук по назві, категоріях, доступності.</div>
+                    <a class="btn btn-outline-primary btn-sm" asp-controller="Menu" asp-action="Index">Відкрити Меню</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <div class="fw-semibold mb-1">Події</div>
+                    <div class="text-muted small mb-3">Афіша майбутніх івентів та деталі.</div>
+                    <a class="btn btn-outline-primary btn-sm" asp-controller="PublicEvents" asp-action="Index">Відкрити Події</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <div class="fw-semibold mb-1">Бронювання</div>
+                    <div class="text-muted small mb-3">Забронюй місця на подію в 1 клік.</div>
+                    <a class="btn btn-outline-primary btn-sm" asp-controller="PublicEvents" asp-action="Index">Перейти до подій</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- GALLERY STRIP -->
+<section class="mb-4">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+        <h2 class="h4 mb-0">Атмосфера</h2>
+        <span class="text-muted small">Lihtar moments</span>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="rounded-4 overflow-hidden shadow-sm" style="height: 320px;">
+                <div class="h-100 w-100"
+                     style="background-image:url('/img/home/crowd.jpg'); background-size:cover; background-position:center;">
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="rounded-4 overflow-hidden shadow-sm mb-3" style="height: 152px;">
+                <div class="h-100 w-100"
+                     style="background-image:url('/img/home/singer.jpg'); background-size:cover; background-position:center;">
+                </div>
+            </div>
+            <div class="rounded-4 overflow-hidden shadow-sm" style="height: 152px;">
+                <div class="h-100 w-100"
+                     style="background-image:url('/img/home/guitar.jpg'); background-size:cover; background-position:center;">
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card h-100 border-0 shadow-sm rounded-4">
+                <div class="card-body d-flex flex-column">
+                    <div class="fw-semibold mb-2">Коротко про нас</div>
+                    <div class="text-muted small">
+                        Lihtar — арт-паб з живими виступами, баром і кухнею. Слідкуй за афішею подій та бронюй місця.
+                    </div>
+
+                    <div class="mt-auto pt-3">
+                        <a class="btn btn-primary w-100" asp-controller="PublicEvents" asp-action="Index">Обрати подію</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
