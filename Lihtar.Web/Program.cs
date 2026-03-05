@@ -6,12 +6,16 @@ using Lihtar.Infrastructure.Repositories;
 using Lihtar.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // MVC
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssembly(typeof(Lihtar.Application.Validators.MenuCategoryDtoValidator).Assembly);
 // DbContext
 builder.Services.AddDbContext<ArtPubDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -53,7 +57,7 @@ builder.Services.ConfigureApplicationCookie(opt =>
 
 // Email
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
-
+builder.Services.AddAutoMapper(typeof(Lihtar.Application.Mappings.MenuItemProfile).Assembly);
 var app = builder.Build();
 
 // ---------- SEED ----------

@@ -1,4 +1,5 @@
-﻿using Lihtar.Application.DTOs;
+﻿using AutoMapper;
+using Lihtar.Application.DTOs;
 using Lihtar.Application.Interfaces;
 using Lihtar.Domain.Entities;
 
@@ -7,36 +8,36 @@ namespace Lihtar.Application.Services;
 public class MenuItemService : IMenuItemService
 {
     private readonly IMenuItemRepository _repo;
+    private readonly IMapper _mapper;
 
-    public MenuItemService(IMenuItemRepository repo) => _repo = repo;
+    public MenuItemService(IMenuItemRepository repo, IMapper mapper)
+    {
+        _repo = repo;
+        _mapper = mapper;
+    }
 
     public async Task<List<MenuItemDto>> GetAllAsync()
-        => (await _repo.GetAllAsync()).Select(MapToDto).ToList();
+    {
+        var items = await _repo.GetAllAsync();
+        return _mapper.Map<List<MenuItemDto>>(items);
+    }
 
     public async Task<MenuItemDto?> GetByIdAsync(Guid id)
     {
         var item = await _repo.GetByIdAsync(id);
-        return item is null ? null : MapToDto(item);
+        return item is null ? null : _mapper.Map<MenuItemDto>(item);
     }
 
     public async Task CreateAsync(MenuItemDto dto)
     {
-        var entity = new MenuItem
-        {
-            Id = Guid.NewGuid(),
-            MenuCategoryId = dto.MenuCategoryId,
-            Name = dto.Name,
-            Description = dto.Description,
-            Price = dto.Price,
-            Calories = dto.Calories,
-            WeightGrams = dto.WeightGrams,
-            ImageUrl = dto.ImageUrl,
-            IsAvailable = dto.IsAvailable,
-            TagLinks = dto.TagIds.Select(tid => new MenuItemTagLink
-            {
-                TagId = tid
-            }).ToList()
-        };
+        var entity = _mapper.Map<MenuItem>(dto);
+        entity.Id = Guid.NewGuid();
+
+        // теги: DTO.TagIds -> TagLinks
+        entity.TagLinks = dto.TagIds
+            .Distinct()
+            .Select(tid => new MenuItemTagLink { TagId = tid, MenuItemId = entity.Id })
+            .ToList();
 
         await _repo.AddAsync(entity);
     }
@@ -46,36 +47,27 @@ public class MenuItemService : IMenuItemService
         var entity = await _repo.GetByIdAsync(dto.Id);
         if (entity is null) return;
 
-        entity.MenuCategoryId = dto.MenuCategoryId;
-        entity.Name = dto.Name;
-        entity.Description = dto.Description;
-        entity.Price = dto.Price;
-        entity.Calories = dto.Calories;
-        entity.WeightGrams = dto.WeightGrams;
-        entity.ImageUrl = dto.ImageUrl;
-        entity.IsAvailable = dto.IsAvailable;
+        // мапимо прості поля (без TagLinks)
+        _mapper.Map(dto, entity);
 
-        // оновлення тегів: найпростіше і надійне
-        entity.TagLinks.Clear();
-        foreach (var tagId in dto.TagIds.Distinct())
-            entity.TagLinks.Add(new MenuItemTagLink { TagId = tagId, MenuItemId = entity.Id });
+        // оновлення тегів як у тебе (надійно)
+        var newIds = dto.TagIds.Distinct().ToHashSet();
+
+        // прибираємо зайві
+        entity.TagLinks = entity.TagLinks
+            .Where(l => newIds.Contains(l.TagId))
+            .ToList();
+
+        // додаємо нові
+        var existing = entity.TagLinks.Select(l => l.TagId).ToHashSet();
+        foreach (var tagId in newIds)
+        {
+            if (!existing.Contains(tagId))
+                entity.TagLinks.Add(new MenuItemTagLink { TagId = tagId, MenuItemId = entity.Id });
+        }
 
         await _repo.UpdateAsync(entity);
     }
 
     public Task DeleteAsync(Guid id) => _repo.DeleteAsync(id);
-
-    private static MenuItemDto MapToDto(MenuItem x) => new()
-    {
-        Id = x.Id,
-        MenuCategoryId = x.MenuCategoryId,
-        Name = x.Name,
-        Description = x.Description,
-        Price = x.Price,
-        Calories = x.Calories,
-        WeightGrams = x.WeightGrams,
-        ImageUrl = x.ImageUrl,
-        IsAvailable = x.IsAvailable,
-        TagIds = x.TagLinks.Select(t => t.TagId).ToList()
-    };
 }

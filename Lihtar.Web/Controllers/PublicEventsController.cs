@@ -3,6 +3,7 @@ using Lihtar.Domain.Entities;
 using Lihtar.Domain.Enums;
 using Lihtar.Infrastructure.Data;
 using Lihtar.Infrastructure.Identity;
+using Lihtar.Web.Helpers;
 using Lihtar.Web.ViewModels.PublicEvents;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -18,20 +19,23 @@ public class PublicEventsController : Controller
 
     private readonly ArtPubDbContext _db;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IEmailSender _emailSender;
 
     public PublicEventsController(
         IEventService eventService,
         IEventCategoryService categoryService,
         ArtPubDbContext db,
-        UserManager<ApplicationUser> userManager)
+        UserManager<ApplicationUser> userManager,
+        IEmailSender emailSender)
     {
         _eventService = eventService;
         _categoryService = categoryService;
         _db = db;
         _userManager = userManager;
+        _emailSender = emailSender;
     }
 
-    // ---------------- INDEX (твій залишаємо як є) ----------------
+    // ---------------- INDEX ----------------
     [HttpGet]
     public async Task<IActionResult> Index(
         string? q,
@@ -146,7 +150,6 @@ public class PublicEventsController : Controller
             AvailableSeats = e.AvailableSeats,
             ImageUrl = e.ImageUrl,
             IsActive = e.IsActive,
-
             CanBook = e.IsActive && e.EventDate >= DateTime.Now && e.AvailableSeats > 0
         };
 
@@ -155,7 +158,7 @@ public class PublicEventsController : Controller
 
     // ---------------- BOOK (reserve seat) ----------------
     [HttpPost]
-    [Authorize] // бронь тільки для логіну
+    [Authorize]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Book(Guid id)
     {
@@ -163,7 +166,6 @@ public class PublicEventsController : Controller
         if (string.IsNullOrWhiteSpace(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
             return Forbid();
 
-        // важливо: тягнемо без AsNoTracking, бо будемо змінювати AvailableSeats
         var e = await _db.Events.FirstOrDefaultAsync(x => x.Id == id);
         if (e is null) return NotFound();
 
@@ -179,31 +181,38 @@ public class PublicEventsController : Controller
             return RedirectToAction(nameof(Details), new { id });
         }
 
-        // опціонально: не даємо бронювати 2 рази одну і ту ж подію одному користувачу
-        var already = await _db.EventTickets.AnyAsync(t => t.EventId == id && t.UserId == userId && t.Status == TicketStatus.Active);
+        var already = await _db.EventTickets.AnyAsync(t =>
+            t.EventId == id && t.UserId == userId && t.Status == TicketStatus.Active);
+
         if (already)
         {
             TempData["Error"] = "У тебе вже є активний квиток на цю подію.";
             return RedirectToAction(nameof(Details), new { id });
         }
 
-        // Транзакція + зменшення місць + створення квитка
+        EventTicket? ticketForEmail = null;
+
         await using var tx = await _db.Database.BeginTransactionAsync();
         try
         {
-            // ще раз перевірка після lock-like транзакції
+            // ще раз перевірка (після початку транзакції)
             e = await _db.Events.FirstOrDefaultAsync(x => x.Id == id);
-            if (e is null) return NotFound();
+            if (e is null)
+            {
+                await tx.RollbackAsync();
+                return NotFound();
+            }
 
             if (e.AvailableSeats <= 0)
             {
+                await tx.RollbackAsync();
                 TempData["Error"] = "Місця вже закінчились.";
                 return RedirectToAction(nameof(Details), new { id });
             }
 
             e.AvailableSeats -= 1;
 
-            var ticket = new EventTicket
+            ticketForEmail = new EventTicket
             {
                 Id = Guid.NewGuid(),
                 EventId = e.Id,
@@ -214,7 +223,8 @@ public class PublicEventsController : Controller
                 Status = TicketStatus.Active
             };
 
-            _db.EventTickets.Add(ticket);
+            _db.EventTickets.Add(ticketForEmail);
+
             await _db.SaveChangesAsync();
             await tx.CommitAsync();
 
@@ -224,6 +234,51 @@ public class PublicEventsController : Controller
         {
             await tx.RollbackAsync();
             TempData["Error"] = "Помилка бронювання. Спробуй ще раз.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        // ✅ Email після commit: QR як inline CID (працює навіть на localhost)
+        try
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var email = user?.Email;
+
+            if (!string.IsNullOrWhiteSpace(email) && ticketForEmail is not null)
+            {
+                var cid = "ticket-qr";
+                var qrPngBytes = QrCodeHelper.ToPngBytes(ticketForEmail.QRCode);
+
+                var subject = $"Lihtar — твій квиток: {e.Title}";
+                var body = $@"
+<h2>Квиток заброньовано ✅</h2>
+<p><b>Подія:</b> {e.Title}</p>
+<p><b>Дата:</b> {e.EventDate:dd.MM.yyyy HH:mm}</p>
+<p><b>Ціна:</b> {e.Price} грн</p>
+<p><b>Твій QR-код:</b></p>
+<img src='cid:{cid}' style='width:260px;height:260px' />
+<p style='margin-top:10px'>Код квитка: <b>{ticketForEmail.QRCode}</b></p>
+";
+
+                await _emailSender.SendAsync(
+                    email,
+                    subject,
+                    body,
+                    new List<EmailAttachment>
+                    {
+                        new EmailAttachment
+                        {
+                            FileName = "ticket-qr.png",
+                            Content = qrPngBytes,
+                            ContentType = "image/png",
+                            IsInline = true,
+                            ContentId = cid
+                        }
+                    });
+            }
+        }
+        catch
+        {
+            // ігноруємо: квиток вже створений
         }
 
         return RedirectToAction(nameof(Details), new { id });

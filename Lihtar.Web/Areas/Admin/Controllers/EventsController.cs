@@ -202,16 +202,14 @@ public class EventsController : AdminBaseController
 
         if (entity is null) return RedirectToAction(nameof(Index));
 
+        // ✅ видаляємо квитки події
         if (entity.Tickets.Any())
-        {
-            TempData["Error"] = "Неможливо видалити подію: є куплені квитки.";
-            return RedirectToAction(nameof(Index));
-        }
+            _db.EventTickets.RemoveRange(entity.Tickets);
 
         _db.Events.Remove(entity);
         await _db.SaveChangesAsync();
 
-        TempData["Success"] = "Подію видалено ✅";
+        TempData["Success"] = "Подію видалено ✅ (разом з квитками)";
         return RedirectToAction(nameof(Index));
     }
 
