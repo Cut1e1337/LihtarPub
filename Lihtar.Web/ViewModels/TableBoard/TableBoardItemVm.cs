@@ -16,6 +16,8 @@ public class TableBoardItemVm
 
     public Guid? ReservationId { get; set; }
 
+    public Guid? ActiveOrderId { get; set; }
+
     public DateTime? ReservationDate { get; set; }
 
     public TimeSpan? StartTime { get; set; }

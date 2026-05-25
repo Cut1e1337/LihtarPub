@@ -1,0 +1,175 @@
+﻿@model Lihtar.Application.DTOs.OrderDto
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Order";
+    var menuItems = ViewBag.MenuItems as List<SelectListItem> ?? new();
+}
+
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+            <h2 class="mb-0">
+                Замовлення
+                @if (Model.TableNumber != null)
+                {
+                    <span>столик №@Model.TableNumber</span>
+                }
+            </h2>
+
+            <div class="text-muted small">
+                Статус: @Model.Status |
+                Створено: @Model.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+            </div>
+        </div>
+
+        <a href="/Admin/TableBoard" class="btn btn-outline-secondary">
+            Назад до залу
+        </a>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-light">
+            <strong>Додати позицію</strong>
+        </div>
+
+        <div class="card-body">
+            <form action="/Admin/Orders/AddItem" method="post" class="row g-2">
+                @Html.AntiForgeryToken()
+
+                <input type="hidden" name="orderId" value="@Model.Id" />
+
+                <div class="col-md-7">
+                    <select name="menuItemId" class="form-select" required>
+                        <option value="">Оберіть позицію меню</option>
+                        @foreach (var item in menuItems)
+                        {
+                            <option value="@item.Value">@item.Text</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <input name="quantity"
+                           type="number"
+                           min="1"
+                           value="1"
+                           class="form-control"
+                           required />
+                </div>
+
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">
+                        Додати
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-light">
+            <strong>Чек</strong>
+        </div>
+
+        <div class="card-body p-0">
+            <table class="table table-striped align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Позиція</th>
+                        <th style="width: 120px;">Кількість</th>
+                        <th style="width: 140px;">Ціна</th>
+                        <th style="width: 140px;">Сума</th>
+                        <th class="text-end" style="width: 220px;">Дії</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (Model.Items.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                У замовленні ще немає позицій.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td>@item.MenuItemName</td>
+                                <td>
+                                    <form action="/Admin/Orders/UpdateItem" method="post" class="d-flex gap-2">
+                                        @Html.AntiForgeryToken()
+
+                                        <input type="hidden" name="orderId" value="@Model.Id" />
+                                        <input type="hidden" name="orderItemId" value="@item.Id" />
+
+                                        <input name="quantity"
+                                               type="number"
+                                               min="0"
+                                               value="@item.Quantity"
+                                               class="form-control form-control-sm" />
+
+                                        <button class="btn btn-sm btn-warning" type="submit">
+                                            OK
+                                        </button>
+                                    </form>
+                                </td>
+                                <td>@item.Price.ToString("0.00") грн</td>
+                                <td>@item.TotalPrice.ToString("0.00") грн</td>
+                                <td class="text-end">
+                                    <form action="/Admin/Orders/RemoveItem" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+
+                                        <input type="hidden" name="orderId" value="@Model.Id" />
+                                        <input type="hidden" name="orderItemId" value="@item.Id" />
+
+                                        <button class="btn btn-sm btn-danger" type="submit">
+                                            Видалити
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+
+                <tfoot>
+                    <tr>
+                        <th colspan="3" class="text-end">Разом:</th>
+                        <th>@Model.TotalPrice.ToString("0.00") грн</th>
+                        <th></th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <form action="/Admin/Orders/Complete" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="orderId" value="@Model.Id" />
+
+            <button type="submit"
+                    class="btn btn-success"
+                    onclick="return confirm('Закрити замовлення?');">
+                Закрити замовлення
+            </button>
+        </form>
+
+        <form action="/Admin/Orders/Cancel" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="orderId" value="@Model.Id" />
+
+            <button type="submit"
+                    class="btn btn-danger"
+                    onclick="return confirm('Скасувати замовлення?');">
+                Скасувати
+            </button>
+        </form>
+    </div>
+</div>

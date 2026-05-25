@@ -43,6 +43,8 @@ builder.Services.AddScoped<ITableService, TableService>();
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
 
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 // Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(opt =>
 {
