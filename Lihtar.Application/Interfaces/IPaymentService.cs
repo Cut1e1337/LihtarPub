@@ -12,7 +12,7 @@ public interface IPaymentService
 
     Task<Guid> CreateSplitPaymentAsync(Guid orderId, Guid userId, Dictionary<Guid, int> selectedItems);
 
-    Task ConfirmMockPaymentAsync(Guid paymentId, string cardNumber);
+    Task ConfirmMockPaymentAsync(Guid paymentId, string cardNumber, bool useBonuses);
 
     Task<Dictionary<Guid, int>> GetPaidQuantitiesByOrderAsync(Guid orderId);
 

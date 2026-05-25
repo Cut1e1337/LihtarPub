@@ -168,9 +168,9 @@ public class PaymentsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Confirm(Guid paymentId, string cardNumber)
+    public async Task<IActionResult> Confirm(Guid paymentId, string cardNumber, bool useBonuses)
     {
-        await _paymentService.ConfirmMockPaymentAsync(paymentId, cardNumber);
+        await _paymentService.ConfirmMockPaymentAsync(paymentId, cardNumber, useBonuses);
 
         return RedirectToAction(nameof(Success), new { id = paymentId });
     }

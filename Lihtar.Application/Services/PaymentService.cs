@@ -11,15 +11,17 @@ public class PaymentService : IPaymentService
     private readonly IPaymentRepository _paymentRepo;
     private readonly IOrderRepository _orderRepo;
     private readonly IMapper _mapper;
-
+    private readonly IBonusService _bonusService;
     public PaymentService(
-        IPaymentRepository paymentRepo,
-        IOrderRepository orderRepo,
-        IMapper mapper)
+    IPaymentRepository paymentRepo,
+    IOrderRepository orderRepo,
+    IMapper mapper,
+    IBonusService bonusService)
     {
         _paymentRepo = paymentRepo;
         _orderRepo = orderRepo;
         _mapper = mapper;
+        _bonusService = bonusService;
     }
 
     public async Task<List<PaymentDto>> GetByOrderIdAsync(Guid orderId)
@@ -144,20 +146,51 @@ public class PaymentService : IPaymentService
         return payment.Id;
     }
 
-    public async Task ConfirmMockPaymentAsync(Guid paymentId, string cardNumber)
+    public async Task ConfirmMockPaymentAsync(Guid paymentId, string cardNumber, bool useBonuses)
     {
         var payment = await _paymentRepo.GetByIdAsync(paymentId);
 
         if (payment == null)
             throw new InvalidOperationException("Payment not found.");
 
+        if (payment.Status == PaymentStatus.Paid)
+            return;
+
+        if (useBonuses)
+        {
+            var userBonuses = await _bonusService.GetUserBonusesAsync(payment.UserId);
+
+            var bonusesToUse = Math.Min(userBonuses, (int)Math.Floor(payment.Amount));
+
+            if (bonusesToUse > 0)
+            {
+                await _bonusService.UseBonusesAsync(
+                    payment.UserId,
+                    bonusesToUse,
+                    $"Списання бонусів при оплаті #{payment.Id}");
+
+                payment.Amount -= bonusesToUse;
+            }
+        }
+
         payment.Status = PaymentStatus.Paid;
         payment.PaidAt = DateTime.UtcNow;
 
         var digits = new string(cardNumber.Where(char.IsDigit).ToArray());
+
         payment.CardMask = digits.Length >= 4
             ? $"**** **** **** {digits[^4..]}"
             : "****";
+
+        var earnedBonuses = (int)Math.Floor(payment.Amount * 0.01m);
+
+        if (earnedBonuses > 0)
+        {
+            await _bonusService.AddBonusAsync(
+                payment.UserId,
+                earnedBonuses,
+                $"Нарахування бонусів за оплату #{payment.Id}");
+        }
 
         await _paymentRepo.SaveChangesAsync();
     }
