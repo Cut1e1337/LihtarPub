@@ -1,18 +1,18 @@
-﻿namespace Lihtar.Domain.Entities;
+﻿namespace Lihtar.Application.DTOs;
 
-public class OrderItem
+public class OrderItemDto
 {
     public Guid Id { get; set; }
 
     public Guid OrderId { get; set; }
-    public Order? Order { get; set; }
 
     public Guid MenuItemId { get; set; }
-    public MenuItem? MenuItem { get; set; }
+
+    public string MenuItemName { get; set; } = "";
 
     public int Quantity { get; set; }
 
     public decimal Price { get; set; }
 
-    public decimal TotalPrice => Quantity * Price;
+    public decimal TotalPrice { get; set; }
 }
