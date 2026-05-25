@@ -1,0 +1,74 @@
+﻿@model List<Lihtar.Application.DTOs.TableDto>
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Столики";
+}
+
+<div class="container py-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+            <h2 class="mb-0">Столики</h2>
+            <div class="text-muted small">Керування столиками закладу</div>
+        </div>
+
+        <a href="/Admin/Tables/Create" class="btn btn-primary">
+            Додати столик
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-striped align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Номер</th>
+                        <th>Місця</th>
+                        <th>VIP</th>
+                        <th>Активний</th>
+                        <th class="text-end">Дії</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var table in Model)
+                    {
+                        <tr>
+                            <td>№@table.TableNumber</td>
+                            <td>@table.Seats</td>
+                            <td>
+                                @if (table.IsVip)
+                                {
+                                    <span class="badge bg-warning text-dark">VIP</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Ні</span>
+                                }
+                            </td>
+                            <td>
+                                @if (table.IsActive)
+                                {
+                                    <span class="badge bg-success">Так</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Ні</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <a href="/Admin/Tables/Edit/@table.Id" class="btn btn-sm btn-warning">
+                                    Edit
+                                </a>
+
+                                <a href="/Admin/Tables/Delete/@table.Id" class="btn btn-sm btn-danger ms-1">
+                                    Delete
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

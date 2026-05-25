@@ -9,23 +9,25 @@ using Microsoft.EntityFrameworkCore;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 // MVC
 builder.Services.AddControllersWithViews();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssembly(typeof(Lihtar.Application.Validators.MenuCategoryDtoValidator).Assembly);
+
 // DbContext
 builder.Services.AddDbContext<ArtPubDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// ---------- REPOS + SERVICES ----------
+
 builder.Services.AddScoped<IEventCategoryRepository, EventCategoryRepository>();
 builder.Services.AddScoped<IEventCategoryService, EventCategoryService>();
 
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IEventService, EventService>();
 
-// ---------- REPOS + SERVICES ----------
 builder.Services.AddScoped<IMenuCategoryRepository, MenuCategoryRepository>();
 builder.Services.AddScoped<IMenuCategoryService, MenuCategoryService>();
 
@@ -34,6 +36,12 @@ builder.Services.AddScoped<IMenuItemService, MenuItemService>();
 
 builder.Services.AddScoped<IMenuItemTagRepository, MenuItemTagRepository>();
 builder.Services.AddScoped<IMenuItemTagService, MenuItemTagService>();
+
+builder.Services.AddScoped<ITableRepository, TableRepository>();
+builder.Services.AddScoped<ITableService, TableService>();
+
+builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
+builder.Services.AddScoped<IReservationService, ReservationService>();
 
 // Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(opt =>
@@ -57,7 +65,10 @@ builder.Services.ConfigureApplicationCookie(opt =>
 
 // Email
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
+
+// AutoMapper
 builder.Services.AddAutoMapper(typeof(Lihtar.Application.Mappings.MenuItemProfile).Assembly);
+
 var app = builder.Build();
 
 // ---------- SEED ----------

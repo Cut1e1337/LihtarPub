@@ -1,0 +1,78 @@
+﻿@model Lihtar.Application.DTOs.TableDto
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Додати столик";
+}
+
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <h4 class="mb-0">Додати столик</h4>
+        </div>
+
+        <div class="card-body">
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <li>@error.ErrorMessage</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <form action="/Admin/Tables/Create" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3">
+                    <label class="form-label">Номер столика</label>
+                    <input name="TableNumber"
+                           value="@Model.TableNumber"
+                           class="form-control"
+                           type="number"
+                           min="1"
+                           required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Кількість місць</label>
+                    <input name="Seats"
+                           value="@Model.Seats"
+                           class="form-control"
+                           type="number"
+                           min="1"
+                           required />
+                </div>
+
+                <div class="form-check mb-3">
+                    <input name="IsVip"
+                           value="true"
+                           class="form-check-input"
+                           type="checkbox"
+                           @(Model.IsVip ? "checked" : "") />
+                    <label class="form-check-label">VIP столик</label>
+                </div>
+
+                <div class="form-check mb-3">
+                    <input name="IsActive"
+                           value="true"
+                           class="form-check-input"
+                           type="checkbox"
+                           @(Model.IsActive ? "checked" : "") />
+                    <label class="form-check-label">Активний</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    Зберегти
+                </button>
+
+                <a href="/Admin/Tables" class="btn btn-secondary">
+                    Назад
+                </a>
+            </form>
+        </div>
+    </div>
+</div>

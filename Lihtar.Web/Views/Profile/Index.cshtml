@@ -1,0 +1,119 @@
+﻿@model Lihtar.Web.ViewModels.Profile.ProfileVm
+
+@{
+    ViewData["Title"] = "Мій профіль";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h4 class="mb-0">Мій профіль</h4>
+            </div>
+
+            <div class="card-body">
+
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success">
+                        @TempData["Success"]
+                    </div>
+                }
+
+                <div class="text-center mb-4">
+                    <img id="avatarPreview"
+                         src="@(string.IsNullOrWhiteSpace(Model.AvatarUrl) ? "" : Model.AvatarUrl)"
+                         class="rounded-circle border @(string.IsNullOrWhiteSpace(Model.AvatarUrl) ? "d-none" : "")"
+                         style="width: 130px; height: 130px; object-fit: cover;" />
+
+                    <div id="avatarPlaceholder"
+                         class="rounded-circle bg-secondary text-white align-items-center justify-content-center mx-auto @(string.IsNullOrWhiteSpace(Model.AvatarUrl) ? "d-flex" : "d-none")"
+                         style="width: 130px; height: 130px; font-size: 42px;">
+                        👤
+                    </div>
+                </div>
+
+                <form asp-action="Index"
+                      asp-controller="Profile"
+                      method="post"
+                      enctype="multipart/form-data">
+
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input class="form-control" value="@Model.Email" disabled />
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="FullName" class="form-label"></label>
+                        <input asp-for="FullName" class="form-control" />
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="BirthDate" class="form-label"></label>
+                        <input asp-for="BirthDate" class="form-control" />
+                        <span asp-validation-for="BirthDate" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="AvatarFile" class="form-label"></label>
+                        <input asp-for="AvatarFile"
+                               id="avatarInput"
+                               class="form-control"
+                               type="file"
+                               accept="image/*" />
+                    </div>
+
+                    <div class="alert alert-info">
+                        <strong>Бонуси:</strong> @Model.BonusPoints
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        Зберегти зміни
+                    </button>
+
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+                        Назад
+                    </a>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        const avatarInput = document.getElementById('avatarInput');
+        const avatarPreview = document.getElementById('avatarPreview');
+        const avatarPlaceholder = document.getElementById('avatarPlaceholder');
+
+        avatarInput.addEventListener('change', function () {
+            const file = this.files[0];
+
+            if (!file) {
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                avatarPreview.src = e.target.result;
+
+                avatarPreview.classList.remove('d-none');
+
+                avatarPlaceholder.classList.remove('d-flex');
+                avatarPlaceholder.classList.add('d-none');
+            };
+
+            reader.readAsDataURL(file);
+        });
+    </script>
+}

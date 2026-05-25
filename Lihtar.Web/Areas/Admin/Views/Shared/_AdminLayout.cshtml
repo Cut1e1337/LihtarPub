@@ -3,82 +3,113 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin - Lihtar</title>
+    <title>@ViewData["Title"] - Lihtar Admin</title>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
+
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
         <div class="container-fluid">
-            <a class="navbar-brand"
-               asp-area="Admin" asp-controller="AdminHome" asp-action="Index">
+            <a class="navbar-brand fw-bold"
+               asp-area="Admin"
+               asp-controller="AdminHome"
+               asp-action="Index">
                 Lihtar Admin
             </a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNav">
+            <button class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#adminNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
-            <div class="collapse navbar-collapse show" id="adminNav">
+            <div class="collapse navbar-collapse" id="adminNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
                     <li class="nav-item">
                         <a class="nav-link"
-                           asp-area="Admin" asp-controller="AdminHome" asp-action="Index">
+                           asp-area="Admin"
+                           asp-controller="AdminHome"
+                           asp-action="Index">
                             Dashboard
                         </a>
                     </li>
 
                     <li class="nav-item">
                         <a class="nav-link"
-                           asp-area="Admin" asp-controller="MenuCategories" asp-action="Index">
+                           asp-area="Admin"
+                           asp-controller="MenuCategories"
+                           asp-action="Index">
                             Menu Categories
                         </a>
                     </li>
 
                     <li class="nav-item">
                         <a class="nav-link"
-                           asp-area="Admin" asp-controller="MenuItems" asp-action="Index">
+                           asp-area="Admin"
+                           asp-controller="MenuItems"
+                           asp-action="Index">
                             Menu Items
                         </a>
                     </li>
 
                     <li class="nav-item">
                         <a class="nav-link"
-                           asp-area="Admin" asp-controller="Events" asp-action="Index">
+                           asp-area="Admin"
+                           asp-controller="Events"
+                           asp-action="Index">
                             Events
                         </a>
                     </li>
 
                     <li class="nav-item">
                         <a class="nav-link"
-                           asp-area="Admin" asp-controller="EventCategories" asp-action="Index">
+                           asp-area="Admin"
+                           asp-controller="EventCategories"
+                           asp-action="Index">
                             Event Categories
                         </a>
                     </li>
 
-                    <!-- ✅ USERS ТІЛЬКИ ОДИН -->
                     <li class="nav-item">
                         <a class="nav-link"
-                           asp-area="Admin" asp-controller="Users" asp-action="Index">
+                           asp-area="Admin"
+                           asp-controller="Tables"
+                           asp-action="Index">
+                            Tables
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           asp-area="Admin"
+                           asp-controller="Users"
+                           asp-action="Index">
                             Users
                         </a>
                     </li>
+
                 </ul>
 
                 <div class="d-flex gap-2">
-                    <a class="btn btn-outline-light"
-                       asp-area="Admin" asp-controller="AdminHome" asp-action="Index">
-                        Адмін-панель
-                    </a>
-
-                    <a class="btn btn-outline-light"
-                       asp-area="" asp-controller="Home" asp-action="Index">
+                    <a class="btn btn-outline-light btn-sm"
+                       asp-area=""
+                       asp-controller="Home"
+                       asp-action="Index">
                         На сайт
                     </a>
 
-                    <form asp-area="" asp-controller="Account" asp-action="Logout" method="post">
+                    <form asp-area=""
+                          asp-controller="Account"
+                          asp-action="Logout"
+                          method="post">
                         @Html.AntiForgeryToken()
-                        <button class="btn btn-danger" type="submit">Logout</button>
+                        <button class="btn btn-danger btn-sm" type="submit">
+                            Logout
+                        </button>
                     </form>
                 </div>
             </div>

@@ -76,6 +76,12 @@
                     <div class="d-flex align-items-center gap-2">
                         @if (User?.Identity?.IsAuthenticated ?? false)
                         {
+                            <a class="btn btn-outline-light btn-sm"
+                               asp-controller="Profile"
+                               asp-action="Index">
+                                Профіль
+                            </a>
+
                             <span class="text-light small me-2">
                                 @User.Identity!.Name
                             </span>
