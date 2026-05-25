@@ -4,7 +4,8 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
-	</PropertyGroup>
+	  <UserSecretsId>01303c02-2232-482d-92f3-d3a2327c4d70</UserSecretsId>
+  </PropertyGroup>
 
 	<ItemGroup>
 	  <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
