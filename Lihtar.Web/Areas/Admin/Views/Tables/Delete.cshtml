@@ -2,36 +2,34 @@
 
 @{
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
-    ViewData["Title"] = "Додати столик";
+    ViewData["Title"] = "Видалити столик";
 }
 
 <div class="container py-4">
-    <h2>Додати столик</h2>
+    <h2>Видалити столик</h2>
 
-    <form action="/Admin/Tables/Create" method="post">
+    <div class="alert alert-danger mt-3">
+        Ви точно хочете видалити цей столик?
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <p><strong>Номер столика:</strong> №@Model.TableNumber</p>
+            <p><strong>Кількість місць:</strong> @Model.Seats</p>
+            <p><strong>VIP:</strong> @(Model.IsVip ? "Так" : "Ні")</p>
+            <p><strong>Активний:</strong> @(Model.IsActive ? "Так" : "Ні")</p>
+        </div>
+    </div>
+
+    <form action="/Admin/Tables/DeleteConfirmed/@Model.Id" method="post">
         @Html.AntiForgeryToken()
 
-        <div class="mb-3">
-            <label class="form-label">Номер столика</label>
-            <input name="TableNumber" value="@Model.TableNumber" class="form-control" type="number" min="1" required />
-        </div>
+        <button type="submit" class="btn btn-danger">
+            Видалити
+        </button>
 
-        <div class="mb-3">
-            <label class="form-label">Кількість місць</label>
-            <input name="Seats" value="@Model.Seats" class="form-control" type="number" min="1" required />
-        </div>
-
-        <div class="form-check mb-3">
-            <input name="IsVip" value="true" class="form-check-input" type="checkbox" @(Model.IsVip ? "checked" : "") />
-            <label class="form-check-label">VIP столик</label>
-        </div>
-
-        <div class="form-check mb-3">
-            <input name="IsActive" value="true" class="form-check-input" type="checkbox" @(Model.IsActive ? "checked" : "") />
-            <label class="form-check-label">Активний</label>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Зберегти</button>
-        <a href="/Admin/Tables" class="btn btn-secondary">Назад</a>
+        <a href="/Admin/Tables" class="btn btn-secondary">
+            Назад
+        </a>
     </form>
 </div>

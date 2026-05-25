@@ -43,6 +43,13 @@ public class TablesController : AdminBaseController
         if (dto.Seats <= 0)
             ModelState.AddModelError(nameof(dto.Seats), "Кількість місць має бути більше 0.");
 
+        var tables = await _service.GetAllAsync();
+
+        var tableExists = tables.Any(x => x.TableNumber == dto.TableNumber);
+
+        if (tableExists)
+            ModelState.AddModelError(nameof(dto.TableNumber), "Столик з таким номером вже існує.");
+
         if (!ModelState.IsValid)
             return View(dto);
 
@@ -75,6 +82,15 @@ public class TablesController : AdminBaseController
 
         if (dto.Seats <= 0)
             ModelState.AddModelError(nameof(dto.Seats), "Кількість місць має бути більше 0.");
+
+        var tables = await _service.GetAllAsync();
+
+        var tableExists = tables.Any(x =>
+            x.TableNumber == dto.TableNumber &&
+            x.Id != dto.Id);
+
+        if (tableExists)
+            ModelState.AddModelError(nameof(dto.TableNumber), "Столик з таким номером вже існує.");
 
         if (!ModelState.IsValid)
             return View(dto);

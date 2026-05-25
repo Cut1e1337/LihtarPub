@@ -18,4 +18,6 @@ public class Reservation
     public ReservationStatus Status { get; set; } = ReservationStatus.Pending;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+
 }
