@@ -1,64 +1,54 @@
 ﻿@{
-    ViewData["Title"] = "Головна адмінки";
+    ViewData["Title"] = "Головна";
 }
 
-<div class="admin-home">
+<div class="admin-cover">
 
-    <div class="admin-hero">
-        <div>
-            <span class="admin-badge">Адмін-панель Lihtar</span>
+    <div class="admin-cover-left">
+        <span class="admin-cover-badge">Lihtar Admin</span>
 
-            <h2>Керування рестораном</h2>
+        <h2>Панель керування рестораном</h2>
 
-            <p>
-                Тут можна швидко перейти до меню, подій, столиків,
-                бронювань та користувачів.
-            </p>
-        </div>
+        <p>
+            Швидкий доступ до меню, подій, столиків, бронювань
+            та користувачів у єдиному зручному просторі.
+        </p>
 
-        <div class="admin-hero-icon">
-            🍽️
+        <div class="admin-cover-actions">
+            <a asp-area="Admin" asp-controller="TableBoard" asp-action="Index" class="btn btn-primary">
+                Відкрити дошку столиків
+            </a>
+
+            <a asp-area="Admin" asp-controller="Reservations" asp-action="Index" class="btn btn-outline-secondary">
+                Переглянути бронювання
+            </a>
         </div>
     </div>
 
-    <div class="admin-grid">
+    <div class="admin-cover-right">
+        <div class="admin-cover-card">
+            <div class="admin-cover-icon">🍽️</div>
+            <h3>Сьогодні</h3>
+            <p>Контроль залу, столиків і бронювань</p>
+        </div>
 
-        <a class="admin-tile" asp-area="Admin" asp-controller="MenuItems" asp-action="Index">
-            <div class="admin-tile-icon">🍕</div>
-            <h3>Позиції меню</h3>
-            <p>Додавання та редагування страв</p>
-        </a>
+        <div class="admin-cover-card">
+            <div class="admin-cover-icon">📋</div>
+            <h3>Меню</h3>
+            <p>Страви, категорії та доступність</p>
+        </div>
 
-        <a class="admin-tile" asp-area="Admin" asp-controller="Events" asp-action="Index">
-            <div class="admin-tile-icon">🎉</div>
+        <div class="admin-cover-card">
+            <div class="admin-cover-icon">🎉</div>
             <h3>Події</h3>
-            <p>Керування подіями ресторану</p>
-        </a>
+            <p>Афіші, вечори та спеціальні заходи</p>
+        </div>
 
-        <a class="admin-tile" asp-area="Admin" asp-controller="Tables" asp-action="Index">
-            <div class="admin-tile-icon">🪑</div>
-            <h3>Столики</h3>
-            <p>Налаштування столиків у залі</p>
-        </a>
-
-        <a class="admin-tile" asp-area="Admin" asp-controller="TableBoard" asp-action="Index">
-            <div class="admin-tile-icon">📋</div>
-            <h3>Дошка столиків</h3>
-            <p>Статус столиків на сьогодні</p>
-        </a>
-
-        <a class="admin-tile" asp-area="Admin" asp-controller="Reservations" asp-action="Index">
-            <div class="admin-tile-icon">📅</div>
-            <h3>Бронювання</h3>
-            <p>Перегляд заявок гостей</p>
-        </a>
-
-        <a class="admin-tile" asp-area="Admin" asp-controller="Users" asp-action="Index">
-            <div class="admin-tile-icon">👤</div>
+        <div class="admin-cover-card">
+            <div class="admin-cover-icon">👤</div>
             <h3>Користувачі</h3>
-            <p>Ролі та акаунти користувачів</p>
-        </a>
-
+            <p>Акаунти, ролі та доступи</p>
+        </div>
     </div>
 
 </div>
