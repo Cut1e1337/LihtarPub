@@ -1,0 +1,18 @@
+﻿@model Lihtar.Application.DTOs.PaymentDto
+
+@{
+    ViewData["Title"] = "Оплата успішна";
+    var bonus = Math.Floor(Model.Amount * 0.01m);
+}
+
+<div class="container py-4">
+    <div class="alert alert-success">
+        <h4>Оплата успішна</h4>
+        <p class="mb-1">Сума: <strong>@Model.Amount.ToString("0.00") грн</strong></p>
+        <p class="mb-0">Бонуси: <strong>@bonus</strong></p>
+    </div>
+
+    <a href="/" class="btn btn-primary">
+        На головну
+    </a>
+</div>

@@ -26,6 +26,9 @@ public class ArtPubDbContext
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
 
+    public DbSet<Payment> Payments => Set<Payment>();
+    public DbSet<PaymentItem> PaymentItems => Set<PaymentItem>();
+
     public DbSet<Review> Reviews => Set<Review>();
     public DbSet<MenuItemReview> MenuItemReviews => Set<MenuItemReview>();
     public DbSet<EventReview> EventReviews => Set<EventReview>();
@@ -43,7 +46,34 @@ public class ArtPubDbContext
     {
         base.OnModelCreating(builder);
 
-        // Підхоплює всі конфіги з папки Data/Configurations
         builder.ApplyConfigurationsFromAssembly(typeof(ArtPubDbContext).Assembly);
+
+        builder.Entity<Order>()
+            .Property(x => x.TotalPrice)
+            .HasPrecision(18, 2);
+
+        builder.Entity<OrderItem>()
+            .Property(x => x.Price)
+            .HasPrecision(18, 2);
+
+        builder.Entity<Payment>()
+            .Property(x => x.Amount)
+            .HasPrecision(18, 2);
+
+        builder.Entity<PaymentItem>()
+            .Property(x => x.Price)
+            .HasPrecision(18, 2);
+
+        builder.Entity<PaymentItem>()
+            .HasOne(x => x.Payment)
+            .WithMany(x => x.Items)
+            .HasForeignKey(x => x.PaymentId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<PaymentItem>()
+            .HasOne(x => x.OrderItem)
+            .WithMany()
+            .HasForeignKey(x => x.OrderItemId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

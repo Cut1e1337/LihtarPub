@@ -77,6 +77,11 @@
                                     Мої бронювання
                                 </a>
                             </li>
+                            <a class="nav-link"
+                               asp-controller="Payments"
+                               asp-action="SelectTable">
+                                Оплата
+                            </a>
                         }
 
                         @if (User.IsInRole("Admin"))

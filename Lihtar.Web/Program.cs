@@ -22,6 +22,9 @@ builder.Services.AddDbContext<ArtPubDbContext>(options =>
 
 // ---------- REPOS + SERVICES ----------
 
+builder.Services.AddScoped<IBonusRepository, BonusRepository>();
+builder.Services.AddScoped<IBonusService, BonusService>();
+
 builder.Services.AddScoped<IEventCategoryRepository, EventCategoryRepository>();
 builder.Services.AddScoped<IEventCategoryService, EventCategoryService>();
 
@@ -34,6 +37,11 @@ builder.Services.AddScoped<IMenuCategoryService, MenuCategoryService>();
 builder.Services.AddScoped<IMenuItemRepository, MenuItemRepository>();
 builder.Services.AddScoped<IMenuItemService, MenuItemService>();
 
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+
+
+
 builder.Services.AddScoped<IMenuItemTagRepository, MenuItemTagRepository>();
 builder.Services.AddScoped<IMenuItemTagService, MenuItemTagService>();
 
@@ -45,6 +53,8 @@ builder.Services.AddScoped<IReservationService, ReservationService>();
 
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+
+
 // Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(opt =>
 {
