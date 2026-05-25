@@ -1,0 +1,133 @@
+﻿@model List<Lihtar.Application.DTOs.ReservationDto>
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Reservations";
+}
+
+<div class="container py-4">
+
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+            <h2 class="mb-0">Reservations</h2>
+            <div class="text-muted small">Manage table reservations</div>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Table</th>
+                            <th>Seats</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                            <th>Comment</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (Model == null || Model.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    No reservations found.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>№@item.TableNumber</td>
+                                    <td>@item.Seats</td>
+                                    <td>@item.ReservationDate.ToString("dd.MM.yyyy")</td>
+                                    <td>@item.StartTime.ToString(@"hh\:mm") - @item.EndTime.ToString(@"hh\:mm")</td>
+                                    <td>
+                                        @if (item.Status.ToString() == "Pending")
+                                        {
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        }
+                                        else if (item.Status.ToString() == "Confirmed")
+                                        {
+                                            <span class="badge bg-success">Confirmed</span>
+                                        }
+                                        else if (item.Status.ToString() == "Cancelled")
+                                        {
+                                            <span class="badge bg-danger">Cancelled</span>
+                                        }
+                                        else if (item.Status.ToString() == "Completed")
+                                        {
+                                            <span class="badge bg-secondary">Completed</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">@item.Status</span>
+                                        }
+                                    </td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.Comment) ? "—" : item.Comment)</td>
+                                    <td class="text-end">
+
+                                        <form action="/Admin/Reservations/Confirm" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-success"
+                                                    onclick="return confirm('Confirm this reservation?');">
+                                                Confirm
+                                            </button>
+                                        </form>
+
+                                        <form action="/Admin/Reservations/Cancel" method="post" class="d-inline ms-1">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-warning"
+                                                    onclick="return confirm('Cancel this reservation?');">
+                                                Cancel
+                                            </button>
+                                        </form>
+
+                                        <form action="/Admin/Reservations/Complete" method="post" class="d-inline ms-1">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-secondary"
+                                                    onclick="return confirm('Mark as completed?');">
+                                                Complete
+                                            </button>
+                                        </form>
+
+                                        <form action="/Admin/Reservations/Delete" method="post" class="d-inline ms-1">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-danger"
+                                                    onclick="return confirm('Delete this reservation?');">
+                                                Delete
+                                            </button>
+                                        </form>
+
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>

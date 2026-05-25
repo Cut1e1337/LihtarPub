@@ -1,0 +1,69 @@
+﻿@model List<Lihtar.Application.DTOs.ReservationDto>
+
+@{
+    ViewData["Title"] = "Мої бронювання";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="mb-0">Мої бронювання</h2>
+            <div class="text-muted small">Список ваших бронювань столиків</div>
+        </div>
+
+        <a asp-controller="Reservations" asp-action="Create" class="btn btn-primary">
+            Нове бронювання
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-striped align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Столик</th>
+                        <th>Місця</th>
+                        <th>Дата</th>
+                        <th>Час</th>
+                        <th>Статус</th>
+                        <th>Коментар</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (Model == null || Model.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                У вас ще немає бронювань.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>№@item.TableNumber</td>
+                                <td>@item.Seats</td>
+                                <td>@item.ReservationDate.ToString("dd.MM.yyyy")</td>
+                                <td>@item.StartTime.ToString(@"hh\:mm") - @item.EndTime.ToString(@"hh\:mm")</td>
+                                <td>
+                                    <span class="badge bg-secondary">@item.Status</span>
+                                </td>
+                                <td>@(string.IsNullOrWhiteSpace(item.Comment) ? "—" : item.Comment)</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
