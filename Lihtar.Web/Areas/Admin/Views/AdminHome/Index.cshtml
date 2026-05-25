@@ -1,67 +1,64 @@
-﻿<h2>Admin Dashboard</h2>
+﻿@{
+    ViewData["Title"] = "Головна адмінки";
+}
 
-<p>Вітаю! Ти в адмін-панелі. Тут можна керувати даними.</p>
+<div class="admin-home">
 
-<hr />
+    <div class="admin-hero">
+        <div>
+            <span class="admin-badge">Адмін-панель Lihtar</span>
 
-<style>
-    .admin-btn {
-        display: inline-block;
-        padding: 12px 18px;
-        margin: 6px 8px 6px 0;
-        border-radius: 10px;
-        text-decoration: none;
-        font-weight: 600;
-        border: 1px solid #222;
-        background: #1f6feb;
-        color: #fff;
-        cursor: pointer;
-    }
+            <h2>Керування рестораном</h2>
 
-        .admin-btn:hover {
-            opacity: .9;
-        }
+            <p>
+                Тут можна швидко перейти до меню, подій, столиків,
+                бронювань та користувачів.
+            </p>
+        </div>
 
-        .admin-btn.gray {
-            background: #6c757d;
-            border-color: #6c757d;
-        }
+        <div class="admin-hero-icon">
+            🍽️
+        </div>
+    </div>
 
-        .admin-btn.green {
-            background: #198754;
-            border-color: #198754;
-        }
+    <div class="admin-grid">
 
-        .admin-btn.purple {
-            background: #6f42c1;
-            border-color: #6f42c1;
-        }
+        <a class="admin-tile" asp-area="Admin" asp-controller="MenuItems" asp-action="Index">
+            <div class="admin-tile-icon">🍕</div>
+            <h3>Позиції меню</h3>
+            <p>Додавання та редагування страв</p>
+        </a>
 
-        .admin-btn.disabled {
-            opacity: .55;
-            pointer-events: none;
-        }
-</style>
+        <a class="admin-tile" asp-area="Admin" asp-controller="Events" asp-action="Index">
+            <div class="admin-tile-icon">🎉</div>
+            <h3>Події</h3>
+            <p>Керування подіями ресторану</p>
+        </a>
 
-<!-- ✅ Меню -->
-<a class="admin-btn" href="/Admin/MenuCategories">
-    🍽 Категорії меню
-</a>
+        <a class="admin-tile" asp-area="Admin" asp-controller="Tables" asp-action="Index">
+            <div class="admin-tile-icon">🪑</div>
+            <h3>Столики</h3>
+            <p>Налаштування столиків у залі</p>
+        </a>
 
-<a class="admin-btn" href="/Admin/MenuItems">
-    🍽 Позиції меню
-</a>
+        <a class="admin-tile" asp-area="Admin" asp-controller="TableBoard" asp-action="Index">
+            <div class="admin-tile-icon">📋</div>
+            <h3>Дошка столиків</h3>
+            <p>Статус столиків на сьогодні</p>
+        </a>
 
-<!-- ✅ Події (НОВЕ) -->
-<a class="admin-btn green" href="/Admin/EventCategories">
-    🎉 Категорії подій
-</a>
+        <a class="admin-tile" asp-area="Admin" asp-controller="Reservations" asp-action="Index">
+            <div class="admin-tile-icon">📅</div>
+            <h3>Бронювання</h3>
+            <p>Перегляд заявок гостей</p>
+        </a>
 
-<a class="admin-btn green" href="/Admin/Events">
-    🎉 Події
-</a>
+        <a class="admin-tile" asp-area="Admin" asp-controller="Users" asp-action="Index">
+            <div class="admin-tile-icon">👤</div>
+            <h3>Користувачі</h3>
+            <p>Ролі та акаунти користувачів</p>
+        </a>
 
-<a class="admin-btn purple" href="/Admin/Users">
-    👤 Користувачі
-</a>
+    </div>
 
+</div>

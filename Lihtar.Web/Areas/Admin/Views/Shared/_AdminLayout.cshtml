@@ -10,110 +10,73 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold"
+    <div class="lihtar-shell">
+
+        <aside class="lihtar-sidebar">
+            <a class="lihtar-logo"
                asp-area="Admin"
                asp-controller="AdminHome"
                asp-action="Index">
-                Lihtar Admin
+                <div class="lihtar-logo-mark">L</div>
+                <span>Lihtar Admin</span>
             </a>
 
-            <button class="navbar-toggler"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#adminNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+            <nav class="lihtar-nav">
+                <a class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminHome" ? "active" : "")"
+                   asp-area="Admin" asp-controller="AdminHome" asp-action="Index">
+                    Головна
+                </a>
 
-            <div class="collapse navbar-collapse" id="adminNav">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <a class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "MenuCategories" ? "active" : "")"
+                   asp-area="Admin" asp-controller="MenuCategories" asp-action="Index">
+                    Категорії меню
+                </a>
 
-                    <li class="nav-item">
-                        <a class="nav-link"
-                           asp-area="Admin"
-                           asp-controller="AdminHome"
-                           asp-action="Index">
-                            Dashboard
-                        </a>
-                    </li>
+                <a class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "MenuItems" ? "active" : "")"
+                   asp-area="Admin" asp-controller="MenuItems" asp-action="Index">
+                    Позиції меню
+                </a>
 
-                    <li class="nav-item">
-                        <a class="nav-link"
-                           asp-area="Admin"
-                           asp-controller="MenuCategories"
-                           asp-action="Index">
-                            Menu Categories
-                        </a>
-                    </li>
+                <a class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Events" ? "active" : "")"
+                   asp-area="Admin" asp-controller="Events" asp-action="Index">
+                    Події
+                </a>
 
-                    <li class="nav-item">
-                        <a class="nav-link"
-                           asp-area="Admin"
-                           asp-controller="MenuItems"
-                           asp-action="Index">
-                            Menu Items
-                        </a>
-                    </li>
+                <a class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "EventCategories" ? "active" : "")"
+                   asp-area="Admin" asp-controller="EventCategories" asp-action="Index">
+                    Категорії подій
+                </a>
 
-                    <li class="nav-item">
-                        <a class="nav-link"
-                           asp-area="Admin"
-                           asp-controller="Events"
-                           asp-action="Index">
-                            Events
-                        </a>
-                    </li>
+                <a class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Tables" ? "active" : "")"
+                   asp-area="Admin" asp-controller="Tables" asp-action="Index">
+                    Столики
+                </a>
 
-                    <li class="nav-item">
-                        <a class="nav-link"
-                           asp-area="Admin"
-                           asp-controller="EventCategories"
-                           asp-action="Index">
-                            Event Categories
-                        </a>
-                    </li>
+                <a class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "TableBoard" ? "active" : "")"
+                   asp-area="Admin" asp-controller="TableBoard" asp-action="Index">
+                    Дошка столиків
+                </a>
 
-                    <li class="nav-item">
-                        <a class="nav-link"
-                           asp-area="Admin"
-                           asp-controller="Tables"
-                           asp-action="Index">
-                            Tables
-                        </a>
-                    </li>
+                <a class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Reservations" ? "active" : "")"
+                   asp-area="Admin" asp-controller="Reservations" asp-action="Index">
+                    Бронювання
+                </a>
 
-                    <li class="nav-item">
-                        <a class="nav-link"
-                           asp-area="Admin"
-                           asp-controller="TableBoard"
-                           asp-action="Index">
-                            Table Board
-                        </a>
-                    </li>
+                <a class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Users" ? "active" : "")"
+                   asp-area="Admin" asp-controller="Users" asp-action="Index">
+                    Користувачі
+                </a>
+            </nav>
+        </aside>
 
-                    <li class="nav-item">
-                        <a class="nav-link"
-                           asp-area="Admin"
-                           asp-controller="Reservations"
-                           asp-action="Index">
-                            Reservations
-                        </a>
-                    </li>
+        <div class="lihtar-main">
+            <header class="lihtar-topbar">
+                <h1 class="lihtar-page-title">
+                    @ViewData["Title"]
+                </h1>
 
-                    <li class="nav-item">
-                        <a class="nav-link"
-                           asp-area="Admin"
-                           asp-controller="Users"
-                           asp-action="Index">
-                            Users
-                        </a>
-                    </li>
-
-                </ul>
-
-                <div class="d-flex gap-2">
-                    <a class="btn btn-outline-light btn-sm"
+                <div class="lihtar-top-actions">
+                    <a class="lh-btn"
                        asp-area=""
                        asp-controller="Home"
                        asp-action="Index">
@@ -123,20 +86,23 @@
                     <form asp-area=""
                           asp-controller="Account"
                           asp-action="Logout"
-                          method="post">
+                          method="post"
+                          class="d-inline">
                         @Html.AntiForgeryToken()
-                        <button class="btn btn-danger btn-sm" type="submit">
-                            Logout
+
+                        <button class="lh-btn lh-btn-primary" type="submit">
+                            Вийти
                         </button>
                     </form>
                 </div>
-            </div>
-        </div>
-    </nav>
+            </header>
 
-    <main class="container mt-4">
-        @RenderBody()
-    </main>
+            <main class="lihtar-content">
+                @RenderBody()
+            </main>
+        </div>
+
+    </div>
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     @RenderSection("Scripts", required: false)

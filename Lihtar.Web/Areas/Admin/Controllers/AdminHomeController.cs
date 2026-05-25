@@ -7,6 +7,12 @@ namespace Lihtar.Web.Areas.Admin.Controllers;
 [Authorize(Roles = "Admin")]
 public class AdminHomeController : Controller
 {
-    public IActionResult Index() => View();
+    public IActionResult Index()
+    {
+        return RedirectToAction(
+            "Index",
+            "TableBoard",
+            new { area = "Admin" }
+        );
+    }
 }
-
