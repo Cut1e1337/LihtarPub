@@ -1,6 +1,5 @@
 ﻿namespace Lihtar.Web.ViewModels.Menu
 {
-
     public class MenuItemCardVm
     {
         public Guid Id { get; set; }
@@ -16,5 +15,9 @@
         public string CategoryName { get; set; } = "";
 
         public List<string> Tags { get; set; } = new();
+
+        public bool IsFavorite { get; set; }
+        public double AverageRating { get; set; }
+        public int ReviewsCount { get; set; }
     }
 }

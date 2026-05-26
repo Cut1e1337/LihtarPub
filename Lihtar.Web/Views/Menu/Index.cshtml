@@ -14,6 +14,7 @@
 
         <form method="get" class="d-flex gap-2">
             <input type="hidden" name="categoryId" value="@Model.CategoryId" />
+            <input type="hidden" name="favoritesOnly" value="@Model.FavoritesOnly.ToString().ToLower()" />
             <input type="hidden" name="onlyAvailable" value="@Model.OnlyAvailable.ToString().ToLower()" />
 
             <select class="form-select" name="pageSize" style="max-width:120px;">
@@ -27,54 +28,135 @@
     </div>
 
     <div class="row g-3">
-        <!-- LEFT: categories -->
+
+        <!-- LEFT -->
         <div class="col-lg-3">
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <div class="fw-semibold mb-2">Категорії</div>
 
-                    <a class="d-flex justify-content-between align-items-center text-decoration-none mb-2 @(Model.CategoryId == null ? "fw-semibold" : "")"
-                       href="@Url.Action("Index", "Menu", new { q = Model.Q, categoryId = (Guid?)null, onlyAvailable = Model.OnlyAvailable, page = 1, pageSize = Model.PageSize })">
-                        <span>Усі</span>
-                        <span class="badge bg-secondary">@Model.Categories.Sum(c => c.Count)</span>
-                    </a>
+                    <div class="fw-semibold mb-2">
+                        Категорії
+                    </div>
 
                     <div class="list-group">
+
+                        <!-- ALL -->
+                        <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center
+                           @(Model.CategoryId == null && !Model.FavoritesOnly ? "active" : "")"
+                           href="@Url.Action("Index", "Menu", new
+                           {
+                               q = Model.Q,
+                               favoritesOnly = false,
+                               categoryId = (Guid?)null,
+                               onlyAvailable = Model.OnlyAvailable,
+                               page = 1,
+                               pageSize = Model.PageSize
+                           })">
+
+                            <span>Усі</span>
+
+                            <span class="badge @(Model.CategoryId == null && !Model.FavoritesOnly ? "bg-light text-dark" : "bg-secondary")">
+                                @Model.Categories.Sum(c => c.Count)
+                            </span>
+                        </a>
+
                         @foreach (var c in Model.Categories)
                         {
-                            <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center @(c.IsActive ? "active" : "")"
-                               href="@Url.Action("Index", "Menu", new { q = Model.Q, categoryId = c.Id, onlyAvailable = Model.OnlyAvailable, page = 1, pageSize = Model.PageSize })">
-                                <span>@c.Name</span>
-                                <span class="badge @(c.IsActive ? "bg-light text-dark" : "bg-secondary")">@c.Count</span>
-                            </a>
+                            if (c.Id == Guid.Empty)
+                            {
+                                <!-- FAVORITES -->
+                                <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center
+                                           @(Model.FavoritesOnly ? "active" : "")"
+                                   href="@Url.Action("Index", "Menu", new
+                                   {
+                                       q = Model.Q,
+                                       favoritesOnly = true,
+                                       onlyAvailable = Model.OnlyAvailable,
+                                       page = 1,
+                                       pageSize = Model.PageSize
+                                   })">
+
+                            <span>❤️ @c.Name</span>
+
+                                    <span class="badge @(Model.FavoritesOnly ? "bg-light text-dark" : "bg-secondary")">
+                                        @c.Count
+                                    </span>
+                                </a>
+                                                }
+                            else
+                            {
+                                <!-- NORMAL CATEGORY -->
+                                <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center
+                                           @(c.IsActive ? "active" : "")"
+                                   href="@Url.Action("Index", "Menu", new
+                                   {
+                                       q = Model.Q,
+                                       favoritesOnly = false,
+                                       categoryId = c.Id,
+                                       onlyAvailable = Model.OnlyAvailable,
+                                       page = 1,
+                                       pageSize = Model.PageSize
+                                   })">
+
+                            <span>@c.Name</span>
+
+                                    <span class="badge @(c.IsActive ? "bg-light text-dark" : "bg-secondary")">
+                                        @c.Count
+                                    </span>
+                                </a>
+                                                }
                         }
                     </div>
 
                     <hr />
 
+                    <!-- SEARCH -->
                     <form method="get" class="vstack gap-2">
+
                         <input type="hidden" name="categoryId" value="@Model.CategoryId" />
+                        <input type="hidden" name="favoritesOnly" value="@Model.FavoritesOnly.ToString().ToLower()" />
                         <input type="hidden" name="pageSize" value="@Model.PageSize" />
 
-                        <input class="form-control" name="q" value="@Model.Q" placeholder="Пошук по назві..." />
+                        <input class="form-control"
+                               name="q"
+                               value="@Model.Q"
+                               placeholder="Пошук по назві..." />
 
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="onlyAvail" name="onlyAvailable" value="true"
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   id="onlyAvail"
+                                   name="onlyAvailable"
+                                   value="true"
                                    @(Model.OnlyAvailable ? "checked" : "") />
-                            <label class="form-check-label" for="onlyAvail">Тільки доступні</label>
+
+                            <label class="form-check-label" for="onlyAvail">
+                                Тільки доступні
+                            </label>
                         </div>
 
                         <div class="d-flex gap-2">
-                            <button class="btn btn-primary w-100" type="submit">Шукати</button>
+
+                            <button class="btn btn-primary w-100" type="submit">
+                                Шукати
+                            </button>
+
                             <a class="btn btn-outline-secondary w-100"
-                               href="@Url.Action("Index", "Menu", new { page = 1, pageSize = Model.PageSize })">Скинути</a>
+                               href="@Url.Action("Index", "Menu", new
+                               {
+                                   page = 1,
+                                   pageSize = Model.PageSize
+                               })">
+
+                                Скинути
+                            </a>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
 
-        <!-- RIGHT: items -->
+        <!-- RIGHT -->
         <div class="col-lg-9">
 
             @if (Model.Items.Count == 0)
@@ -86,67 +168,156 @@
             else
             {
                 <div class="row g-3">
+
                     @foreach (var item in Model.Items)
                     {
                         <div class="col-md-6 col-xl-4">
+
                             <div class="card shadow-sm h-100">
+
                                 @if (!string.IsNullOrWhiteSpace(item.ImageUrl))
                                 {
-                                    <img src="@item.ImageUrl" class="card-img-top" style="height:180px; object-fit:cover;" />
+                                    <img src="@item.ImageUrl"
+                                         class="card-img-top"
+                                         style="height:180px; object-fit:cover;" />
                                 }
                                 else
                                 {
-                                    <div class="bg-light d-flex align-items-center justify-content-center" style="height:180px;">
+                                    <div class="bg-light d-flex align-items-center justify-content-center"
+                                         style="height:180px;">
                                         <span class="text-muted">No image</span>
                                     </div>
                                 }
 
                                 <div class="card-body d-flex flex-column">
+
                                     <div class="d-flex justify-content-between align-items-start gap-2">
+
                                         <div>
-                                            <div class="fw-semibold">@item.Name</div>
-                                            <div class="text-muted small">@item.CategoryName</div>
+                                            <div class="fw-semibold">
+                                                @item.Name
+                                            </div>
+
+                                            <div class="text-muted small">
+                                                @item.CategoryName
+                                            </div>
                                         </div>
-                                        <div class="fw-bold">@item.Price.ToString("0.00") ₴</div>
+
+                                        <div class="fw-bold">
+                                            @item.Price.ToString("0.00") ₴
+                                        </div>
                                     </div>
 
                                     @if (!string.IsNullOrWhiteSpace(item.Description))
                                     {
-                                        <div class="text-muted small mt-2" style="min-height:40px;">
+                                        <div class="text-muted small mt-2"
+                                             style="min-height:40px;">
                                             @item.Description
                                         </div>
                                     }
 
                                     <div class="mt-2 small text-muted">
+
                                         @if (item.WeightGrams.HasValue)
                                         {
                                             <span>@item.WeightGrams г</span>
                                         }
+
                                         @if (item.Calories.HasValue)
                                         {
-                                            <span class="ms-2">@item.Calories ккал</span>
+                                            <span class="ms-2">
+                                                @item.Calories ккал
+                                            </span>
                                         }
                                     </div>
 
                                     @if (item.Tags.Count > 0)
                                     {
                                         <div class="mt-2 d-flex flex-wrap gap-1">
+
                                             @foreach (var t in item.Tags.Take(4))
                                             {
-                                                <span class="badge bg-secondary">@t</span>
+                                                <span class="badge bg-secondary">
+                                                    @t
+                                                </span>
                                             }
                                         </div>
                                     }
 
-                                    <div class="mt-auto pt-3">
-                                        @if (item.IsAvailable)
+                                    <div class="mt-2 small">
+
+                                        @if (item.AverageRating > 0)
                                         {
-                                            <span class="badge bg-success">Доступно</span>
+                                            <span>
+                                                ⭐ @item.AverageRating.ToString("0.0") / 5
+                                            </span>
+
+                                            <span class="text-muted">
+                                                (@item.ReviewsCount)
+                                            </span>
                                         }
                                         else
                                         {
-                                            <span class="badge bg-danger">Немає</span>
+                                            <span class="text-muted">
+                                                Немає відгуків
+                                            </span>
                                         }
+                                    </div>
+
+                                    <div class="mt-auto pt-3">
+
+                                        @if (item.IsAvailable)
+                                        {
+                                            <span class="badge bg-success">
+                                                Доступно
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">
+                                                Немає
+                                            </span>
+                                        }
+
+                                        <div class="d-flex gap-2 mt-3">
+
+                                            <a asp-controller="Menu"
+                                               asp-action="Details"
+                                               asp-route-id="@item.Id"
+                                               class="btn btn-sm btn-primary">
+
+                                                Детальніше
+                                            </a>
+
+                                            @if (User.Identity?.IsAuthenticated == true)
+                                            {
+                                                <form asp-controller="Menu"
+                                                      asp-action="ToggleFavorite"
+                                                      method="post">
+
+                                                    @Html.AntiForgeryToken()
+
+                                                    <input type="hidden"
+                                                           name="menuItemId"
+                                                           value="@item.Id" />
+
+                                                    @if (item.IsFavorite)
+                                                    {
+                                                        <button type="submit"
+                                                                class="btn btn-sm btn-danger">
+                                                            ♥
+                                                        </button>
+                                                    }
+                                                    else
+                                                    {
+                                                        <button type="submit"
+                                                                class="btn btn-sm btn-outline-danger">
+                                                            ♡
+                                                        </button>
+                                                    }
+                                                </form>
+                                            }
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -157,14 +328,28 @@
                 @if (Model.TotalPages > 1)
                 {
                     <nav class="mt-4">
+
                         <ul class="pagination">
+
                             @for (int i = 1; i <= Model.TotalPages; i++)
                             {
                                 <li class="page-item @(i == Model.Page ? "active" : "")">
+
                                     <a class="page-link"
-                                       href="@Url.Action("Index", "Menu", new { q = Model.Q, categoryId = Model.CategoryId, onlyAvailable = Model.OnlyAvailable, page = i, pageSize = Model.PageSize })">@i</a>
-                                </li>
-                            }
+                                       href="@Url.Action("Index", "Menu", new
+                                       {
+                                           q = Model.Q,
+                                           categoryId = Model.CategoryId,
+                                           favoritesOnly = Model.FavoritesOnly,
+                                           onlyAvailable = Model.OnlyAvailable,
+                                           page = i,
+                                           pageSize = Model.PageSize
+                                       })">
+
+                            @i
+                        </a>
+                    </li>
+                                        }
                         </ul>
                     </nav>
                 }
