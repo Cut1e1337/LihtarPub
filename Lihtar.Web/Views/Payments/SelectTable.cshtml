@@ -14,6 +14,8 @@
     <div class="row g-3">
         @foreach (var table in Model)
         {
+            var hasOpenCheck = table.ActiveOrderId != null && table.TotalPrice.HasValue && table.TotalPrice.Value > 0;
+
             <div class="col-md-4 col-lg-3">
                 <div class="card shadow-sm h-100">
                     <div class="card-body">
@@ -28,11 +30,17 @@
                             <span class="badge bg-warning text-dark mb-2">VIP</span>
                         }
 
-                        @if (table.ActiveOrderId != null)
+                        @if (hasOpenCheck)
                         {
                             <div class="alert alert-success py-2 mt-3">
                                 Активний чек:
                                 <strong>@table.TotalPrice?.ToString("0.00") грн</strong>
+                            </div>
+                        }
+                        else if (table.ActiveOrderId != null)
+                        {
+                            <div class="alert alert-success py-2 mt-3">
+                                Чек закритий
                             </div>
                         }
                         else
@@ -44,7 +52,7 @@
                     </div>
 
                     <div class="card-footer bg-white">
-                        @if (table.ActiveOrderId != null)
+                        @if (hasOpenCheck)
                         {
                             <a href="/Payments/Order/@table.ActiveOrderId"
                                class="btn btn-primary w-100">
@@ -54,7 +62,7 @@
                         else
                         {
                             <button class="btn btn-secondary w-100" disabled>
-                                Недоступно
+                                Оплата недоступна
                             </button>
                         }
                     </div>

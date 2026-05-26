@@ -12,96 +12,120 @@
         <div class="text-muted mb-3">Столик №@Model.TableNumber</div>
     }
 
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
     @if (TempData["Error"] != null)
     {
         <div class="alert alert-danger">@TempData["Error"]</div>
     }
 
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-light">
-            <strong>Повний чек</strong>
+    @if (Model.IsClosed)
+    {
+        <div class="alert alert-success">
+            Чек уже закритий. Оплата більше недоступна.
         </div>
 
-        <div class="card-body p-0">
-            <table class="table table-striped mb-0">
-                <thead>
-                    <tr>
-                        <th>Позиція</th>
-                        <th>Кількість</th>
-                        <th>Ціна</th>
-                        <th>Сума</th>
-                    </tr>
-                </thead>
-                <tbody>
+        <a asp-controller="Payments"
+           asp-action="SelectTable"
+           class="btn btn-outline-secondary">
+            Назад до столиків
+        </a>
+    }
+    else
+    {
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <strong>Повний чек</strong>
+            </div>
+
+            <div class="card-body p-0">
+                <table class="table table-striped mb-0">
+                    <thead>
+                        <tr>
+                            <th>Позиція</th>
+                            <th>Кількість</th>
+                            <th>Ціна</th>
+                            <th>Сума</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td>@item.MenuItemName</td>
+                                <td>@item.Quantity</td>
+                                <td>@item.Price.ToString("0.00") грн</td>
+                                <td>@item.TotalPrice.ToString("0.00") грн</td>
+                            </tr>
+                        }
+                    </tbody>
+
+                    <tfoot>
+                        <tr>
+                            <th colspan="3" class="text-end">Разом:</th>
+                            <th>@Model.TotalPrice.ToString("0.00") грн</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <form action="/Payments/PayFull" method="post" class="mb-4">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" name="orderId" value="@Model.OrderId" />
+
+            <button type="submit" class="btn btn-success">
+                Оплатити весь чек
+            </button>
+        </form>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <strong>Роздільна оплата</strong>
+            </div>
+
+            <div class="card-body">
+                <form action="/Payments/PaySplit" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" name="orderId" value="@Model.OrderId" />
+
                     @foreach (var item in Model.Items)
                     {
-                        <tr>
-                            <td>@item.MenuItemName</td>
-                            <td>@item.Quantity</td>
-                            <td>@item.Price.ToString("0.00") грн</td>
-                            <td>@item.TotalPrice.ToString("0.00") грн</td>
-                        </tr>
-                    }
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <th colspan="3" class="text-end">Разом:</th>
-                        <th>@Model.TotalPrice.ToString("0.00") грн</th>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-    </div>
+                        <div class="row align-items-center mb-3">
+                            <div class="col-md-5">
+                                <strong>@item.MenuItemName</strong>
 
-    <form action="/Payments/PayFull" method="post" class="mb-4">
-        @Html.AntiForgeryToken()
-        <input type="hidden" name="orderId" value="@Model.OrderId" />
+                                <div class="text-muted small">
+                                    @item.Price.ToString("0.00") грн за 1 шт.
+                                </div>
+                            </div>
 
-        <button type="submit" class="btn btn-success">
-            Оплатити весь чек
-        </button>
-    </form>
+                            <div class="col-md-3">
+                                Доступно: @item.Quantity
+                            </div>
 
-    <div class="card shadow-sm">
-        <div class="card-header bg-light">
-            <strong>Роздільна оплата</strong>
-        </div>
-
-        <div class="card-body">
-            <form action="/Payments/PaySplit" method="post">
-                @Html.AntiForgeryToken()
-
-                <input type="hidden" name="orderId" value="@Model.OrderId" />
-
-                @foreach (var item in Model.Items)
-                {
-                    <div class="row align-items-center mb-3">
-                        <div class="col-md-5">
-                            <strong>@item.MenuItemName</strong>
-                            <div class="text-muted small">
-                                @item.Price.ToString("0.00") грн за 1 шт.
+                            <div class="col-md-4">
+                                <input name="qty_@item.OrderItemId"
+                                       type="number"
+                                       min="0"
+                                       max="@item.Quantity"
+                                       value="0"
+                                       class="form-control" />
                             </div>
                         </div>
+                    }
 
-                        <div class="col-md-3">
-                            Доступно: @item.Quantity
-                        </div>
-
-                        <div class="col-md-4">
-                            <input name="qty_@item.OrderItemId"
-                                   type="number"
-                                   min="0"
-                                   max="@item.Quantity"
-                                   value="0"
-                                   class="form-control" />
-                        </div>
-                    </div>
-                }
-
-                <button type="submit" class="btn btn-primary">
-                    Оплатити вибрані позиції
-                </button>
-            </form>
+                    <button type="submit" class="btn btn-primary">
+                        Оплатити вибрані позиції
+                    </button>
+                </form>
+            </div>
         </div>
-    </div>
+    }
 </div>

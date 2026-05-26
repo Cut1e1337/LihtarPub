@@ -43,6 +43,12 @@ public class PaymentsController : Controller
             if (activeOrder != null)
             {
                 remainingAmount = await _paymentService.GetRemainingAmountByOrderAsync(activeOrder.Id);
+
+                if (remainingAmount <= 0)
+                {
+                    activeOrder = null;
+                    remainingAmount = 0;
+                }
             }
 
             vm.Add(new SelectTablePaymentVm
@@ -90,12 +96,15 @@ public class PaymentsController : Controller
             .Where(x => x.Quantity > 0)
             .ToList();
 
+        var totalPrice = visibleItems.Sum(x => x.TotalPrice);
+
         var vm = new OrderPaymentVm
         {
             OrderId = order.Id,
             TableNumber = order.TableNumber,
-            TotalPrice = visibleItems.Sum(x => x.TotalPrice),
-            Items = visibleItems
+            TotalPrice = totalPrice,
+            Items = visibleItems,
+            IsClosed = totalPrice <= 0 || visibleItems.Count == 0
         };
 
         return View(vm);
@@ -110,6 +119,14 @@ public class PaymentsController : Controller
         if (user == null)
             return RedirectToAction("Login", "Account");
 
+        var remainingAmount = await _paymentService.GetRemainingAmountByOrderAsync(orderId);
+
+        if (remainingAmount <= 0)
+        {
+            TempData["Success"] = "Чек уже закритий. Оплата більше недоступна.";
+            return RedirectToAction(nameof(Order), new { id = orderId });
+        }
+
         var paymentId = await _paymentService.CreateFullPaymentAsync(orderId, user.Id);
 
         return RedirectToAction(nameof(Confirm), new { id = paymentId });
@@ -123,6 +140,14 @@ public class PaymentsController : Controller
 
         if (user == null)
             return RedirectToAction("Login", "Account");
+
+        var remainingAmount = await _paymentService.GetRemainingAmountByOrderAsync(orderId);
+
+        if (remainingAmount <= 0)
+        {
+            TempData["Success"] = "Чек уже закритий. Оплата більше недоступна.";
+            return RedirectToAction(nameof(Order), new { id = orderId });
+        }
 
         var selectedItems = new Dictionary<Guid, int>();
 
@@ -141,6 +166,12 @@ public class PaymentsController : Controller
 
             if (quantity > 0)
                 selectedItems[orderItemId] = quantity;
+        }
+
+        if (selectedItems.Count == 0)
+        {
+            TempData["Error"] = "Оберіть хоча б одну позицію для оплати.";
+            return RedirectToAction(nameof(Order), new { id = orderId });
         }
 
         try
@@ -168,10 +199,9 @@ public class PaymentsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Confirm(Guid paymentId, string cardNumber, bool useBonuses)
+    public async Task<IActionResult> Confirm(Guid paymentId, string cardNumber)
     {
-        await _paymentService.ConfirmMockPaymentAsync(paymentId, cardNumber, useBonuses);
-
+        await _paymentService.ConfirmMockPaymentAsync(paymentId, cardNumber, false);
         return RedirectToAction(nameof(Success), new { id = paymentId });
     }
 

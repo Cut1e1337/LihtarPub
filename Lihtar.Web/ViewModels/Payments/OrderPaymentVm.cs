@@ -8,5 +8,7 @@ public class OrderPaymentVm
 
     public decimal TotalPrice { get; set; }
 
+    public bool IsClosed { get; set; }
+
     public List<OrderPaymentItemVm> Items { get; set; } = new();
 }
