@@ -592,3 +592,97 @@ a {
         grid-template-columns: 1fr;
     }
 }
+@media (max-width: 768px) {
+    .lihtar-shell {
+        display: block;
+    }
+
+    .lihtar-sidebar {
+        position: relative;
+        width: 100%;
+        min-height: auto;
+        padding: 16px;
+        border-right: none;
+        border-bottom: 1px solid rgba(0,0,0,.08);
+    }
+
+    .lihtar-logo {
+        margin-bottom: 12px;
+    }
+
+    .lihtar-nav {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 6px;
+    }
+
+        .lihtar-nav a {
+            white-space: nowrap;
+            flex: 0 0 auto;
+            padding: 10px 14px;
+            font-size: 14px;
+        }
+
+    .lihtar-main {
+        width: 100%;
+    }
+
+    .lihtar-topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 14px 16px;
+    }
+
+    .lihtar-page-title {
+        font-size: 20px;
+    }
+
+    .lihtar-top-actions {
+        width: 100%;
+        display: flex;
+        overflow-x: auto;
+        gap: 8px;
+    }
+
+    .lh-btn {
+        white-space: nowrap;
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+
+    .lihtar-content {
+        padding: 16px;
+    }
+
+    .container {
+        max-width: 100%;
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .card {
+        border-radius: 16px;
+    }
+
+    table {
+        font-size: 14px;
+    }
+
+    .table {
+        min-width: 600px;
+    }
+
+    .card-body.p-0 {
+        overflow-x: auto;
+    }
+
+    .d-flex {
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        white-space: nowrap;
+    }
+}
