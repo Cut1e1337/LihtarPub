@@ -16,6 +16,8 @@ public class MenuItem
     public string? ImageUrl { get; set; }
     public bool IsAvailable { get; set; } = true;
 
+    public bool IsDeleted { get; set; } = false;
+
     public ICollection<MenuItemTagLink> TagLinks { get; set; } = new List<MenuItemTagLink>();
     public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     public ICollection<MenuItemReview> MenuItemReviews { get; set; } = new List<MenuItemReview>();

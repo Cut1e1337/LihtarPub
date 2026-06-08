@@ -57,18 +57,18 @@ public class MenuController : Controller
             : new List<Guid>();
 
         var categories = await _db.MenuCategories
-            .AsNoTracking()
-            .Where(c => c.IsActive)
-            .OrderBy(c => c.SortOrder)
-            .ThenBy(c => c.Name)
-            .Select(c => new MenuCategoryFilterVm
-            {
-                Id = c.Id,
-                Name = c.Name,
-                Count = c.Items.Count(i => !onlyAvailable || i.IsAvailable),
-                IsActive = !favoritesOnly && categoryId.HasValue && categoryId.Value == c.Id
-            })
-            .ToListAsync();
+     .AsNoTracking()
+     .Where(c => c.IsActive && !c.IsDeleted)
+     .OrderBy(c => c.SortOrder)
+     .ThenBy(c => c.Name)
+     .Select(c => new MenuCategoryFilterVm
+     {
+         Id = c.Id,
+         Name = c.Name,
+         Count = c.Items.Count(i => !i.IsDeleted && (!onlyAvailable || i.IsAvailable)),
+         IsActive = !favoritesOnly && categoryId.HasValue && categoryId.Value == c.Id
+     })
+     .ToListAsync();
 
         if (userId.HasValue)
         {
@@ -82,11 +82,15 @@ public class MenuController : Controller
         }
 
         var itemsQuery = _db.MenuItems
-            .AsNoTracking()
-            .Include(x => x.MenuCategory)
-            .Include(x => x.TagLinks).ThenInclude(t => t.Tag)
-            .Include(x => x.MenuItemReviews).ThenInclude(r => r.Review)
-            .Where(x => x.MenuCategory != null && x.MenuCategory.IsActive);
+    .AsNoTracking()
+    .Include(x => x.MenuCategory)
+    .Include(x => x.TagLinks).ThenInclude(t => t.Tag)
+    .Include(x => x.MenuItemReviews).ThenInclude(r => r.Review)
+    .Where(x =>
+        !x.IsDeleted &&
+        x.MenuCategory != null &&
+        x.MenuCategory.IsActive &&
+        !x.MenuCategory.IsDeleted);
 
         if (onlyAvailable)
             itemsQuery = itemsQuery.Where(x => x.IsAvailable);
@@ -163,11 +167,15 @@ public class MenuController : Controller
         }
 
         var item = await _db.MenuItems
-            .AsNoTracking()
-            .Include(x => x.MenuCategory)
-            .Include(x => x.TagLinks).ThenInclude(t => t.Tag)
-            .Include(x => x.MenuItemReviews).ThenInclude(r => r.Review)
-            .FirstOrDefaultAsync(x => x.Id == id);
+    .AsNoTracking()
+    .Include(x => x.MenuCategory)
+    .Include(x => x.TagLinks).ThenInclude(t => t.Tag)
+    .Include(x => x.MenuItemReviews).ThenInclude(r => r.Review)
+    .FirstOrDefaultAsync(x =>
+        x.Id == id &&
+        !x.IsDeleted &&
+        x.MenuCategory != null &&
+        !x.MenuCategory.IsDeleted);
 
         if (item == null)
             return NotFound();

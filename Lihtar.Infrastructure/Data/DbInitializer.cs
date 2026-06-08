@@ -16,7 +16,7 @@ public static class DbInitializer
         await db.Database.MigrateAsync();
 
         // Roles
-        if (!await roleManager.RoleExistsAsync(UserRole.Admin.ToString()))
+        if (!await roleManager.RoleExistsAsync(UserRole.Admin.ToString()))  
             await roleManager.CreateAsync(new IdentityRole<Guid>(UserRole.Admin.ToString()));
 
         if (!await roleManager.RoleExistsAsync(UserRole.Client.ToString()))

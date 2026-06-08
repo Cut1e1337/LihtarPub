@@ -67,10 +67,13 @@ public class MenuCategoryService : IMenuCategoryService
 
     public async Task DeleteAsync(Guid id)
     {
-        var entity = await _repo.GetByIdAsync(id);
-        if (entity is null) return;
+        var category = await _repo.GetByIdAsync(id);
 
-        _repo.Remove(entity);
+        if (category == null)
+            return;
+
+        category.IsDeleted = true;
+
         await _repo.SaveChangesAsync();
     }
 }

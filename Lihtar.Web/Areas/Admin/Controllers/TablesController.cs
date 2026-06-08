@@ -62,7 +62,9 @@ public class TablesController : AdminBaseController
     [HttpGet]
     public async Task<IActionResult> Edit(Guid id)
     {
-        var table = await _service.GetByIdAsync(id);
+        var tables = await _service.GetAllAsync();
+
+        var table = tables.FirstOrDefault(x => x.Id == id);
 
         if (table == null)
             return NotFound();
@@ -72,10 +74,13 @@ public class TablesController : AdminBaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit([Bind("Id,TableNumber,Seats,IsVip,IsActive")] TableDto dto)
+    public async Task<IActionResult> Edit(TableDto dto)
     {
         if (dto.Id == Guid.Empty)
             return BadRequest();
+
+        dto.IsVip = Request.Form["IsVip"].Contains("true");
+        dto.IsActive = Request.Form["IsActive"].Contains("true");
 
         if (dto.TableNumber <= 0)
             ModelState.AddModelError(nameof(dto.TableNumber), "Номер столика має бути більше 0.");

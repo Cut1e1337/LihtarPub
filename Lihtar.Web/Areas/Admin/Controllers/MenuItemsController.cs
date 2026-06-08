@@ -84,29 +84,37 @@ public class MenuItemsController : AdminBaseController
     [HttpGet]
     public async Task<IActionResult> Edit(Guid id)
     {
-        var dto = await _menuItemService.GetByIdAsync(id);
-        if (dto is null) return NotFound();
+        var item = await _db.MenuItems
+            .Include(x => x.TagLinks)
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        if (item == null)
+            return NotFound();
 
         var vm = new MenuItemEditVm
         {
-            Id = dto.Id,
-            MenuCategoryId = dto.MenuCategoryId,
-            Name = dto.Name,
-            Description = dto.Description,
-            Price = dto.Price,
-            Calories = dto.Calories,
-            WeightGrams = dto.WeightGrams,
-            ImageUrl = dto.ImageUrl,
-            IsAvailable = dto.IsAvailable
+            Id = item.Id,
+            MenuCategoryId = item.MenuCategoryId,
+            Name = item.Name,
+            Description = item.Description,
+            Price = item.Price,
+            Calories = item.Calories,
+            WeightGrams = item.WeightGrams,
+            ImageUrl = item.ImageUrl,
+            IsAvailable = item.IsAvailable
         };
 
         await FillCategories();
-        await FillTags(vm, dto.TagIds ?? new List<Guid>());
 
-        return View(vm); // Views/Admin/MenuItems/Edit.cshtml
+        var selectedTagIds = item.TagLinks
+            .Select(x => x.TagId)
+            .ToList();
+
+        await FillTags(vm, selectedTagIds);
+
+        return View(vm);
     }
 
-    // ---------- EDIT POST (✅ ФІКС: апдейт напряму через EF + SaveChanges) ----------
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(MenuItemEditVm vm)
@@ -116,7 +124,6 @@ public class MenuItemsController : AdminBaseController
         if (vm.MenuCategoryId == Guid.Empty)
             ModelState.AddModelError(nameof(vm.MenuCategoryId), "Оберіть категорію");
 
-        // selected tags беремо з vm.Tags
         var selectedTagIds = vm.Tags
             .Where(t => t.Selected)
             .Select(t => t.Id)
@@ -130,38 +137,38 @@ public class MenuItemsController : AdminBaseController
             return View(vm);
         }
 
-        // 1) тягнемо entity з БД (ВАЖЛИВО: з TagLinks)
         var entity = await _db.MenuItems
             .Include(x => x.TagLinks)
             .FirstOrDefaultAsync(x => x.Id == vm.Id.Value);
 
         if (entity is null) return NotFound();
 
-        // 2) фото: якщо нове не вибрали — лишаємо старе
         var newImageUrl = await SaveImageAsync(vm.ImageFile);
-        var finalImageUrl = newImageUrl ?? entity.ImageUrl; // <- не затираємо
 
-        // 3) апдейтимо прості поля
         entity.MenuCategoryId = vm.MenuCategoryId;
-        entity.Name = vm.Name?.Trim() ?? "";
-        entity.Description = string.IsNullOrWhiteSpace(vm.Description) ? null : vm.Description.Trim();
+        entity.Name = vm.Name;
+        entity.Description = vm.Description;
         entity.Price = vm.Price;
         entity.Calories = vm.Calories;
         entity.WeightGrams = vm.WeightGrams;
         entity.IsAvailable = vm.IsAvailable;
-        entity.ImageUrl = finalImageUrl;
 
-        // 4) апдейтимо теги (через link-table)
-        // прибираємо зайві
-        var toRemove = entity.TagLinks.Where(l => !selectedTagIds.Contains(l.TagId)).ToList();
-        if (toRemove.Count > 0)
-            _db.MenuItemTagLinks.RemoveRange(toRemove);
+        if (newImageUrl != null)
+            entity.ImageUrl = newImageUrl;
 
-        // додаємо нові
-        var existingIds = entity.TagLinks.Select(l => l.TagId).ToHashSet();
+        var removeTags = entity.TagLinks
+            .Where(x => !selectedTagIds.Contains(x.TagId))
+            .ToList();
+
+        _db.MenuItemTagLinks.RemoveRange(removeTags);
+
+        var existingTags = entity.TagLinks
+            .Select(x => x.TagId)
+            .ToHashSet();
+
         foreach (var tagId in selectedTagIds)
         {
-            if (!existingIds.Contains(tagId))
+            if (!existingTags.Contains(tagId))
             {
                 entity.TagLinks.Add(new Lihtar.Domain.Entities.MenuItemTagLink
                 {
@@ -171,7 +178,6 @@ public class MenuItemsController : AdminBaseController
             }
         }
 
-        // 5) SaveChanges
         await _db.SaveChangesAsync();
 
         return RedirectToAction(nameof(Index));

@@ -12,4 +12,6 @@ public class MenuItemDto
     public string? ImageUrl { get; set; }
     public bool IsAvailable { get; set; }
     public List<Guid> TagIds { get; set; } = new();
+
+    public string? MenuCategoryName { get; set; }
 }

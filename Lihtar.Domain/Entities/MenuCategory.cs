@@ -8,5 +8,7 @@ public class MenuCategory
     public int SortOrder { get; set; }
     public bool IsActive { get; set; } = true;
 
+    public bool IsDeleted { get; set; } = false;
+
     public ICollection<MenuItem> Items { get; set; } = new List<MenuItem>();
 }

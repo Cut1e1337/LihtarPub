@@ -14,6 +14,7 @@ public class MenuItemRepository : IMenuItemRepository
         => _db.MenuItems
             .Include(x => x.MenuCategory)
             .Include(x => x.TagLinks).ThenInclude(t => t.Tag)
+            .Where(x => !x.IsDeleted)
             .AsNoTracking()
             .ToListAsync();
 
@@ -36,9 +37,23 @@ public class MenuItemRepository : IMenuItemRepository
 
     public async Task DeleteAsync(Guid id)
     {
-        var entity = await _db.MenuItems.FirstOrDefaultAsync(x => x.Id == id);
+        var entity = await _db.MenuItems
+            .FirstOrDefaultAsync(x => x.Id == id);
+
         if (entity is null) return;
-        _db.MenuItems.Remove(entity);
+
+        var isUsedInOrders = await _db.OrderItems
+            .AnyAsync(x => x.MenuItemId == id);
+
+        if (isUsedInOrders)
+        {
+            entity.IsDeleted = true;
+        }
+        else
+        {
+            _db.MenuItems.Remove(entity);
+        }
+
         await _db.SaveChangesAsync();
     }
 }

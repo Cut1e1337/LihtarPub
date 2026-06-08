@@ -24,13 +24,29 @@
         </div>
 
         <div class="form-check mb-3">
-            <input name="IsVip" value="true" class="form-check-input" type="checkbox" @(Model.IsVip ? "checked" : "") />
-            <label class="form-check-label">VIP столик</label>
+            <input type="hidden" name="IsVip" value="false" />
+
+            <input class="form-check-input"
+                   type="checkbox"
+                   id="IsVip"
+                   name="IsVip"
+                   value="true"
+                   @(Model.IsVip ? "checked" : "") />
+
+            <label class="form-check-label" for="IsVip">VIP столик</label>
         </div>
 
         <div class="form-check mb-3">
-            <input name="IsActive" value="true" class="form-check-input" type="checkbox" @(Model.IsActive ? "checked" : "") />
-            <label class="form-check-label">Активний</label>
+            <input type="hidden" name="IsActive" value="false" />
+
+            <input class="form-check-input"
+                   type="checkbox"
+                   id="IsActive"
+                   name="IsActive"
+                   value="true"
+                   @(Model.IsActive ? "checked" : "") />
+
+            <label class="form-check-label" for="IsActive">Активний</label>
         </div>
 
         <button type="submit" class="btn btn-primary">Зберегти</button>
